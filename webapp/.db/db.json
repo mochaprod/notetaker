@@ -1,0 +1,22 @@
+{
+  "chatMessages": [
+    {
+      "id": "3a7a7f13-4b0a-47a9-bff4-f58aa814dbc0",
+      "key": "default",
+      "createdAt": "2025-10-29T16:19:03.923Z",
+      "message": "Book a limo to the hotel."
+    },
+    {
+      "id": "9ec86596-eaea-4f13-8c49-bd42bfd1d835",
+      "key": "default",
+      "createdAt": "2025-10-29T16:20:29.200Z",
+      "message": "Check in for flight."
+    },
+    {
+      "id": "0d29fe20-7d59-4179-8ea0-09c1d95a28ee",
+      "key": "default",
+      "createdAt": "2025-10-29T16:21:00.785Z",
+      "message": "Will get food at Mangwon market."
+    }
+  ]
+}
