@@ -17,6 +17,36 @@
       "key": "default",
       "createdAt": "2025-10-29T16:21:00.785Z",
       "message": "Will get food at Mangwon market."
+    },
+    {
+      "id": "5ca9af38-5d21-4e0c-9e8f-10198631c8c4",
+      "key": "default",
+      "createdAt": "2025-10-29T16:53:08.450Z",
+      "message": "Get breakfast tomorrow."
+    },
+    {
+      "id": "d4428554-e83b-430e-b302-755ba9f1fb00",
+      "key": "default",
+      "createdAt": "2025-10-29T16:59:54.205Z",
+      "message": "-Flight is at 12:25pm\n-Need to arrive at airport 3 hours before at least.\n-Wake up at 7.\n-Get breakfast and pack remaining stuff\n-Takes about an hour from hotel to TPE."
+    },
+    {
+      "id": "ce6171bb-5b24-4ca5-9551-cc12c93356c2",
+      "key": "default",
+      "createdAt": "2025-10-30T03:03:04.382Z",
+      "message": "Give Annie a hug"
+    },
+    {
+      "id": "4fa64518-9ca1-4f9b-9aec-c72f8727ca92",
+      "key": "default",
+      "createdAt": "2025-10-31T10:13:10.466Z",
+      "message": "Go to one of the malls:\n- COEX\n- Hyundai\n- Lotte Mall"
+    },
+    {
+      "id": "019a3b0d-c1db-75fb-993e-e77f00452bea",
+      "key": "default",
+      "createdAt": "2025-10-31T16:15:48.699Z",
+      "message": "Book tickets for Nami Island."
     }
   ]
 }

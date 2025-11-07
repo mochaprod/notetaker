@@ -1,4 +1,4 @@
-import crypto from "crypto";
+import { v7 as uuidv7 } from "uuid";
 import { LowSync } from "lowdb";
 import { JSONFileSync } from "lowdb/node";
 import { Note, DB } from "./db";
@@ -25,7 +25,7 @@ export class LowDBDB implements DB {
 
     async putNotes(key: string, value: string): Promise<Note> {
         const message = {
-            id: crypto.randomUUID(),
+            id: uuidv7(),
             key,
             createdAt: new Date().toISOString(),
             message: value,

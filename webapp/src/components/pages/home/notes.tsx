@@ -1,40 +1,73 @@
-import { Item, ItemContent, ItemDescription, ItemTitle } from "@/components/ui/item";
+import { Item, ItemContent, ItemTitle } from "@/components/ui/item";
 import { Note } from "@/lib/db/db";
-import { differenceInMinutes, format, formatDistanceToNow } from "date-fns";
+import { compareAsc, differenceInDays, format, formatRelative, startOfDay } from "date-fns";
 
 function getTimeToDisplay(createdDate: Date): string {
     const now = new Date();
-    const diffInMins = differenceInMinutes(now, createdDate);
+    const diffInDays = differenceInDays(now, createdDate);
 
-    return diffInMins > 30
-        ? format(createdDate, "LLL d, y hh:mma")
-        : formatDistanceToNow(createdDate, { addSuffix: true });
+    return diffInDays > 1
+        ? format(createdDate, "LLL d")
+        : formatRelative(createdDate, now);
+}
+
+function groupByDates(notes: Note[]): {
+    date: Date;
+    notes: Note[];
+}[] {
+    const groupedByDates = Map
+        .groupBy(notes, (note) => startOfDay(note.createdAt).toISOString());
+
+    return Array.from(groupedByDates.entries())
+        .sort(([dateA], [dateB]) => compareAsc(dateA, dateB))
+        .map(([date, notes]) => ({ date: new Date(date), notes }));
 }
 
 export interface NotesProps {
-    notes?: Note[];
+    notes: Note[];
 }
 
 export function Notes({ notes }: NotesProps) {
+    const groupedNotes = groupByDates(notes);
+
     return (
-        <div
-            className="flex flex-col gap-1"
+        <ul
+            className="flex flex-col gap-4"
         >
-            { notes?.map(msg => (
-                <Item
-                    key={ msg.id }
-                    variant="outline"
+            { groupedNotes.map(({ date, notes }) => (
+                <li
+                    key={ date.toISOString() }
+                    className="flex flex-col gap-2"
                 >
-                    <ItemContent>
-                        <ItemTitle>
-                            { msg.message }
-                        </ItemTitle>
-                        <ItemDescription>
-                            { getTimeToDisplay(new Date(msg.createdAt)) }
-                        </ItemDescription>
-                    </ItemContent>
-                </Item>
+                    <div
+                        className="flex justify-center text-xs text-slate-200"
+                    >
+                        { getTimeToDisplay(date) }
+                    </div>
+                    <ul
+                        className="flex flex-col gap-2"
+                    >
+                        { notes.map(({
+                            id,
+                            message,
+                        }) => (
+                            <Item
+                                key={ id }
+                                variant="outline"
+                                className="bg-card border-none"
+                            >
+                                <ItemContent>
+                                    <ItemTitle
+                                        className="whitespace-pre-wrap"
+                                    >
+                                        { message }
+                                    </ItemTitle>
+                                </ItemContent>
+                            </Item>
+                        )) }
+                    </ul>
+                </li>
             )) }
-        </div>
+        </ul>
     );
 };
