@@ -1,6 +1,5 @@
 'use client';
 
-import { MarkdownRenderer } from "@/components/markdown/markdown-renderer";
 import { Separator } from "@/components/ui/separator";
 import { Note } from "@/lib/db/db";
 import { useCallback, useState } from "react";
@@ -20,8 +19,11 @@ export function NoteTaker({ initialNotes }: NoteTakerProps) {
     const [notes, setNotes] = useState<Note[]>(initialNotes || []);
     const [aiSummary, setAISummary] = useState<SummaryResponse>();
 
-    const addNoteOptimistic = useCallback((note: Note) => {
+    const addNoteOptimistically = useCallback((note: Note) => {
         setNotes((prevNotes) => [...prevNotes, note]);
+    }, []);
+    const deleteNoteOptimistically = useCallback((id: string) => {
+        setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id));
     }, []);
 
     const summarize = useCallback(async () => {
@@ -39,21 +41,24 @@ export function NoteTaker({ initialNotes }: NoteTakerProps) {
             className="flex justify-center gap-2 container mx-auto"
         >
             <div
-                className={ clsx("flex flex-col gap-2", "max-w-md") }
+                className={ clsx("flex flex-col gap-2", "min-w-md max-w-md") }
             >
                 <Notes
                     notes={ notes }
+                    deleteNoteOptimistically={ deleteNoteOptimistically }
                 />
                 <Separator />
                 <NotesForm
-                    addNoteOptimistic={ addNoteOptimistic }
+                    addNoteOptimistic={ addNoteOptimistically }
                 />
                 <Summarizer
                     summarize={ summarize }
                 />
             </div>
             { aiSummary && (
-                <div>
+                <div
+                    className="min-w-md"
+                >
                     <ul>
                         { aiSummary.tasks.map((task) => (
                             <div

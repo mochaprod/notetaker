@@ -37,4 +37,14 @@ export class LowDBDB implements DB {
 
         return message;
     }
+
+    async deleteNotes(key: string): Promise<void> {
+        this.db.read();
+        const index = this.db.data?.chatMessages?.findIndex(msg => msg.key === key);
+
+        if (index) {
+            this.db.data?.chatMessages?.splice(index, 1);
+            this.db.write();
+        }
+    }
 }

@@ -1,5 +1,11 @@
 import { z } from "zod";
 
+export const ThemesSchema = z.object({
+	name: z.string(),
+	notes: z.array(z.string()),
+	description: z.string(),
+});
+
 export const TaskSchema = z.object({
     noteId: z.string().optional(),
     content: z.string(),
@@ -16,6 +22,7 @@ export const SummaryResponseSchema = z.object({
     tasks: z.array(TaskSchema),
     followUps: z.array(z.string()),
     corrections: z.array(CorrectionSchema),
+    themes: z.array(ThemesSchema),
 });
 
 export type SummaryResponse = z.infer<typeof SummaryResponseSchema>;

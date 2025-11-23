@@ -1,14 +1,28 @@
-import { Item, ItemContent, ItemTitle } from "@/components/ui/item";
+import { deleteNote } from "@/app/actions/home/actions";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from "@/components/ui/item";
 import { Note } from "@/lib/db/db";
-import { compareAsc, differenceInDays, format, formatRelative, startOfDay } from "date-fns";
+import { compareAsc, differenceInDays, format, formatDistanceToNow, formatRelative, startOfDay } from "date-fns";
+import { MoreHorizontalIcon, PenIcon, TrashIcon } from "lucide-react";
 
 function getTimeToDisplay(createdDate: Date): string {
     const now = new Date();
-    const diffInDays = differenceInDays(now, createdDate);
+    const diffInDays = differenceInDays(startOfDay(now), startOfDay(createdDate));
 
-    return diffInDays > 1
-        ? format(createdDate, "LLL d")
-        : formatRelative(createdDate, now);
+    if (diffInDays === 0) {
+        return "Today";
+    }
+
+    if (diffInDays === 1) {
+        return "Yesterday";
+    }
+
+    if (diffInDays < 5) {
+        return formatDistanceToNow(createdDate, { addSuffix: true });
+    }
+
+    return format(createdDate, "LLL d");
 }
 
 function groupByDates(notes: Note[]): {
@@ -25,48 +39,71 @@ function groupByDates(notes: Note[]): {
 
 export interface NotesProps {
     notes: Note[];
+    deleteNoteOptimistically: (id: string) => void;
 }
 
-export function Notes({ notes }: NotesProps) {
+export function Notes({
+    notes,
+    deleteNoteOptimistically,
+}: NotesProps) {
     const groupedNotes = groupByDates(notes);
+
+    const createDeleteNote = (id: string) => async () => {
+        await deleteNote(id);
+        deleteNoteOptimistically(id);
+    };
 
     return (
         <ul
-            className="flex flex-col gap-4"
+            className="flex flex-col gap-2"
         >
-            { groupedNotes.map(({ date, notes }) => (
-                <li
-                    key={ date.toISOString() }
-                    className="flex flex-col gap-2"
+            { notes.map(({
+                id,
+                message,
+            }) => (
+                <Item
+                    key={ id }
+                    variant="outline"
+                    className="bg-card border-none"
                 >
-                    <div
-                        className="flex justify-center text-xs text-slate-200"
-                    >
-                        { getTimeToDisplay(date) }
-                    </div>
-                    <ul
-                        className="flex flex-col gap-2"
-                    >
-                        { notes.map(({
-                            id,
-                            message,
-                        }) => (
-                            <Item
-                                key={ id }
-                                variant="outline"
-                                className="bg-card border-none"
+                    <ItemContent>
+                        <ItemDescription
+                            className="whitespace-pre-wrap line-clamp-none"
+                        >
+                            { message }
+                        </ItemDescription>
+                    </ItemContent>
+                    <ItemActions>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger
+                                asChild
                             >
-                                <ItemContent>
-                                    <ItemTitle
-                                        className="whitespace-pre-wrap"
-                                    >
-                                        { message }
-                                    </ItemTitle>
-                                </ItemContent>
-                            </Item>
-                        )) }
-                    </ul>
-                </li>
+                                <Button
+                                    variant="ghost"
+                                    aria-label="Open menu"
+                                    size="icon-sm"
+                                >
+                                    <MoreHorizontalIcon />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                <DropdownMenuItem>
+                                    <PenIcon />
+                                    Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    className="text-red-400"
+                                    onClick={ createDeleteNote(id) }
+                                >
+                                    <TrashIcon
+                                        className="text-red-400"
+                                    />
+                                    Delete
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </ItemActions>
+                </Item>
             )) }
         </ul>
     );

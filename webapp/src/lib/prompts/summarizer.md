@@ -15,6 +15,37 @@ Input can be provided in multiple ways:
 
 - As a plain string containing all notes. Notes should start with their ID in parentheses followed by the content.
 - As a plain string containing all notes, but no ID associated.
+- Text formatted as JSONL containing notes with an `noteId` and `content`.
+
+## Output
+
+Your output should not simply repeat what the user wrote, but organize notes into an actionable summary. Please output in JSON format. There will be four (4) main fields: `tasks`, `summary`, `followUps`, and `corrections`.
+Your output should not simply repeat what the user wrote, but organize notes into an actionable summary. Please output in JSON format. There will be five (5) main fields: `tasks`, `summary`, `themes`, `followUps`, and `corrections`.
+
+### Fields
+
+<tasks>
+This is a JSON array of objects, where each object represents an action item and contains a `noteId` and `content` string. If it is conclusive that the user has a list of items to accomplish, include them in this list. Order the items chronologically if applicable; if not, order them by their presentation in the input.
+</tasks>
+
+<themes>
+A JSON array of objects, where each object represents a distinct theme or category. Each theme object must have a `name` (string), a `description` (string), and `notes` (an array of note IDs belonging to that theme).
+</themes>
+
+<summary>
+A brief summary of the user's notes.
+</summary>
+
+<follow-ups>
+A JSON array containing questions for the user if there are any unclear notes that need clarification. Unclear notes may be notes that lack sufficient details and have any ambiguity that would affect the ability to provide a proper summary. A follow-up can also be any additional questions that can improve the summary. If a note needs follow-up, still include it in the task list to the best of your ability.
+</follow-ups>
+
+<corrections>
+A JSON array containing brief explanations of any corrections. Each correction should be a JSON object with the following fields:
+- `noteId` string [OPTIONAL]: the note ID that is associated with the correction if applicable.
+- `explanation` string: the explanation of the correction.
+- `confidence` number: a percentage representing the confidence level of the correction. The percentage is a value between 0 and 1.
+</corrections>
 
 ### Examples
 
@@ -53,6 +84,23 @@ Input can be provided in multiple ways:
     }
   ],
   "summary": "You have a meeting scheduled with the drafting team tomorrow to discuss Q3 designs and need to follow up with the sales team about Q2 report figures. Personal tasks include calling your mom for her birthday on November 10th and buying groceries. You also have a reminder to onboard the new intern, John.",
+  "themes": [
+    {
+      "name": "Work",
+      "notes": ["note_abc", "note_jkl", "note_mno"],
+      "description": "Tasks and reminders related to your job, including meetings, team management, and reports."
+    },
+    {
+      "name": "Personal Errands",
+      "notes": ["note_def"],
+      "description": "Groceries and other personal items to purchase."
+    },
+    {
+      "name": "Family",
+      "notes": ["note_ghi"],
+      "description": "Reminders related to family members, like birthdays."
+    }
+  ],
   "followUps": [],
   "corrections": [
     {
@@ -68,28 +116,3 @@ Input can be provided in multiple ways:
   ]
 }
 ```
-
-## Output
-
-Your output should not simply repeat what the user wrote, but organize notes into an actionable summary. Please output in JSON format. There will be four (4) main fields: `tasks`, `summary`, `followUps`, and `corrections`.
-
-### Fields
-
-<tasks>
-This is a JSON array of objects, where each object represents an action item and contains a `noteId` and `content` string. If it is conclusive that the user has a list of items to accomplish, include them in this list. Order the items chronologically if applicable; if not, order them by their presentation in the input.
-</tasks>
-
-<summary>
-A brief summary of the user's notes.
-</summary>
-
-<follow-ups>
-A JSON array containing questions for the user if there are any unclear notes that need clarification. Unclear notes may be notes that lack sufficient details and have any ambiguity that would affect the ability to provide a proper summary. A follow-up can also be any additional questions that can improve the summary.
-</follow-ups>
-
-<corrections>
-A JSON array containing brief explanations of any corrections. Each correction should be a JSON object with the following fields:
-- `noteId` string [OPTIONAL]: the note ID that is associated with the correction if applicable.
-- `explanation` string: the explanation of the correction.
-- `confidence` number: a percentage representing the confidence level of the correction. The percentage is a value between 0 and 1.
-</corrections>

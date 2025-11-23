@@ -28,7 +28,10 @@ export function NotesForm({ addNoteOptimistic }: NotesFormProps) {
                     name="message"
                     placeholder="What's on your mind?"
                 />
-                <Button type="submit" className="h-auto">Write</Button>
+                <Button
+                    type="submit"
+                    className="h-auto"
+                >Write</Button>
             </div>
         </form>
     );
