@@ -22,6 +22,17 @@ export function NoteTaker({ initialNotes }: NoteTakerProps) {
     const addNoteOptimistically = useCallback((note: Note) => {
         setNotes((prevNotes) => [...prevNotes, note]);
     }, []);
+    const updateNoteOptimistically = useCallback((noteId: string, content: string) => {
+        setNotes((prevNotes) => prevNotes.map((note) => {
+            if (note.id === noteId) {
+                return {
+                    ...note,
+                    message: content,
+                };
+            }
+            return note;
+        }));
+    }, []);
     const deleteNoteOptimistically = useCallback((id: string) => {
         setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id));
     }, []);
@@ -45,6 +56,7 @@ export function NoteTaker({ initialNotes }: NoteTakerProps) {
             >
                 <Notes
                     notes={ notes }
+                    updateNoteOptimistically={ updateNoteOptimistically }
                     deleteNoteOptimistically={ deleteNoteOptimistically }
                 />
                 <Separator />

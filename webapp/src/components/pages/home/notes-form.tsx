@@ -1,6 +1,6 @@
 'use client';
 
-import { storeText } from "@/app/actions/home/actions";
+import { addNote } from "@/app/actions/home/actions";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Note } from "@/lib/db/db";
@@ -12,7 +12,7 @@ export interface NotesFormProps {
 export function NotesForm({ addNoteOptimistic }: NotesFormProps) {
     const submitForm = async (formData: FormData) => {
         const text = formData.get("message") as string;
-        const note = await storeText(text);
+        const note = await addNote(text);
 
         if (note) {
             addNoteOptimistic?.(note);

@@ -5,7 +5,7 @@ import { db } from "@/lib/db/db-instance";
 import { createEmbeddingsClient } from "@/lib/embeddings/factory";
 import { createVectorDBClient } from "@/lib/vector/client";
 
-export async function storeText(data: string): Promise<Note | null> {
+export async function addNote(data: string): Promise<Note | null> {
     if (!data || data.trim().length === 0) {
         return null;
     }
@@ -24,6 +24,18 @@ export async function storeText(data: string): Promise<Note | null> {
     }]);
 
     return note;
+}
+
+export async function editNote(id: string, content: string): Promise<void> {
+    const embeddingsClient = createEmbeddingsClient();
+    const vectorDBClient = await createVectorDBClient();
+
+    await db.updateNotes(id, content);
+    const embeddings = await embeddingsClient.generateEmbeddings(content);
+    await vectorDBClient.upsert([{
+        id,
+        embedding: embeddings,
+    }]);
 }
 
 export async function deleteNote(id: string): Promise<void> {
