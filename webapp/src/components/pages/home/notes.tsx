@@ -1,35 +1,15 @@
 "use client";
 
+import { motion } from "motion/react";
 import { deleteNote, editNote } from "@/app/actions/home/actions";
 import { Button } from "@/components/ui/button";
-import { Card, CardAction, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Item, ItemActions, ItemContent, ItemDescription } from "@/components/ui/item";
 import { Textarea } from "@/components/ui/textarea";
 import { Note } from "@/lib/db/db";
-import { LOGGER } from "@/lib/logger";
-import { differenceInDays, format, formatDistanceToNow, startOfDay } from "date-fns";
 import { CheckIcon, MoreHorizontalIcon, PenIcon, TrashIcon, XIcon } from "lucide-react";
 import { useState } from "react";
-
-function getTimeToDisplay(createdDate: Date): string {
-    const now = new Date();
-    const diffInDays = differenceInDays(startOfDay(now), startOfDay(createdDate));
-
-    if (diffInDays === 0) {
-        return "Today";
-    }
-
-    if (diffInDays === 1) {
-        return "Yesterday";
-    }
-
-    if (diffInDays < 5) {
-        return formatDistanceToNow(createdDate, { addSuffix: true });
-    }
-
-    return format(createdDate, "LLL d");
-}
+import { formatRelativeTime } from "@/lib/utils";
 
 export interface NotesProps {
     notes: Note[];
@@ -74,12 +54,17 @@ export function Notes({
                 await editNote(editingNoteId, editingValue);
             } catch (error) {
                 updateNoteOptimistically(editingNoteId, currentNote.message);
-                LOGGER.error("Failed to update note in DB.");
+                console.error("Failed to update note in DB.");
             }
         }
 
         setEditingNoteId(null);
         setEditingValue("");
+    };
+
+    const handleSubmitEditForm = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        await handleEditNote();
     };
 
     return (
@@ -88,87 +73,103 @@ export function Notes({
         >
             { notes.map(({
                 id,
+                createdAt,
                 message,
             }) => (
-                <Card
+                <div
                     key={ id }
-                    className="py-4"
+                    className="flex flex-col gap-1"
                 >
-                    <CardContent
-                        className="flex justify-between items-center gap-2 px-5"
+                    <div
+                        className="text-xs text-muted-foreground flex"
                     >
-                        <div
-                            className="grow"
+                        { formatRelativeTime(new Date(createdAt), true) }
+                    </div>
+                    <Card
+                        className="py-4"
+                    >
+                        <CardContent
+                            className="flex justify-between items-center gap-2 px-5 text-md"
                         >
-                            { editingNoteId === id
-                                ? (
-                                    <div
-                                        className="flex flex-col gap-1"
-                                    >
-                                        <Textarea
-                                            name="message"
-                                            value={ editingValue }
-                                            onChange={ (e) => setEditingValue(e.target.value) }
-                                        />
-                                        <div
-                                            className="flex gap-1 justify-end"
+                            <div
+                                className="grow"
+                            >
+                                { editingNoteId === id
+                                    ? (
+                                        <form
+                                            onSubmit={ handleSubmitEditForm }
                                         >
-                                            <Button
-                                                variant="secondary"
-                                                size="icon-sm"
-                                                onClick={ () => setEditingNoteId(null) }
+                                            <motion.div
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1 }}
+                                                exit={{ opacity: 0 }}
+                                                className="flex flex-col gap-1"
                                             >
-                                                <XIcon />
-                                            </Button>
-                                            <Button
-                                                variant="secondary"
-                                                className="bg-green-500"
-                                                size="icon-sm"
-                                                onClick={ handleEditNote }
-                                            >
-                                                <CheckIcon />
-                                            </Button>
-                                        </div>
-                                    </div>
-                                )
-                                : message }
-                        </div>
-                        <div
-                            className="self-start"
-                        >
-                            <DropdownMenu>
-                                <DropdownMenuTrigger
-                                    asChild
-                                >
-                                    <Button
-                                        variant="ghost"
-                                        aria-label="Open menu"
-                                        size="icon-sm"
+                                                <Textarea
+                                                    value={ editingValue }
+                                                    onChange={ (e) => setEditingValue(e.target.value) }
+                                                />
+                                                <div
+                                                    className="flex gap-1 justify-end"
+                                                >
+                                                    <Button
+                                                        variant="secondary"
+                                                        size="icon-sm"
+                                                        onClick={ () => setEditingNoteId(null) }
+                                                    >
+                                                        <XIcon />
+                                                    </Button>
+                                                    <Button
+                                                        type="submit"
+                                                        variant="secondary"
+                                                        className="bg-green-500"
+                                                        size="icon-sm"
+                                                    >
+                                                        <CheckIcon />
+                                                    </Button>
+                                                </div>
+                                            </motion.div>
+                                        </form>
+                                    )
+                                    : message }
+                            </div>
+                            <div
+                                className="self-start"
+                            >
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger
+                                        asChild
                                     >
-                                        <MoreHorizontalIcon />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent>
-                                    <DropdownMenuItem
-                                        onClick={ createEditNote(id) }
-                                    >
-                                        <PenIcon />
-                                        Edit
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                        className="text-red-400"
-                                        onClick={ createDeleteNote(id) }
-                                    >
-                                        <TrashIcon
+                                        <Button
+                                            variant="ghost"
+                                            aria-label="Open menu"
+                                            size="icon-sm"
+                                        >
+                                            <MoreHorizontalIcon />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent>
+                                        <DropdownMenuItem
+                                            onClick={ createEditNote(id) }
+                                        >
+                                            <PenIcon />
+                                            Edit
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
                                             className="text-red-400"
-                                        />
-                                        Delete
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </div>
-                    </CardContent>
-                </Card>
+                                            onClick={ createDeleteNote(id) }
+                                        >
+                                            <TrashIcon
+                                                className="text-red-400"
+                                            />
+                                            Delete
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
             )) }
         </ul>
     );

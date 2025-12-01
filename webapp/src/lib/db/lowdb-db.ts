@@ -57,7 +57,7 @@ export class LowDBDB implements DB {
         const index = this.db.data?.chatMessages
             ?.findIndex(msg => msg.id === key);
 
-        if (index) {
+        if (index !== -1) {
             this.db.data?.chatMessages?.splice(index, 1);
             this.db.write();
         }

@@ -43,7 +43,7 @@ export function NoteTaker({ initialNotes }: NoteTakerProps) {
         if (response.ok) {
             const json = await response.json();
 
-            setAISummary(SummaryResponseSchema.parse(json.summary));
+            setAISummary(SummaryResponseSchema.parse(json));
         }
     }, []);
 

@@ -4,7 +4,7 @@ import { LLM } from "./llm";
 const systemPrompt = fs.readFileSync(new URL("../prompts/summarizer.md", import.meta.url), "utf8");
 
 export class Ollama implements LLM {
-    async summarize(content: string): Promise<string | undefined> {
+    async summarize(content: string): Promise<string> {
         try {
             const response = await fetch("http://localhost:11434/api/generate", {
                 method: "POST",

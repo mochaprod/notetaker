@@ -1,9 +1,13 @@
 import { GoogleGenAI } from "@google/genai";
 import fs from "fs";
+import mustache from "mustache";
+import path from "path";
 import z from "zod";
+import { Note } from "../db/db";
 import { LLM, SummaryResponse, SummaryResponseSchema } from "./llm";
 
-const systemPrompt = fs.readFileSync(new URL("../prompts/summarizer.md", import.meta.url), "utf8");
+const systemPrompt = fs.readFileSync(path.join(process.cwd(), "./src/lib/prompts/summarizer.md"), "utf8");
+const notePrompt = fs.readFileSync(path.join(process.cwd(), "./src/lib/prompts/summarize-notes.md"), "utf8");
 
 export class Gemini implements LLM {
     private genai: GoogleGenAI;
@@ -12,10 +16,14 @@ export class Gemini implements LLM {
         this.genai = new GoogleGenAI({});
     }
 
-    async summarize(content: string): Promise<SummaryResponse | undefined> {
+    async summarize(notes: Note[]): Promise<SummaryResponse> {
+        const contents = mustache.render(notePrompt, {
+            notes: notes.map((note) => JSON.stringify(note)).join("\n"),
+        });
+
         const response = await this.genai.models.generateContent({
             model: "gemini-2.5-flash-lite",
-            contents: content,
+            contents,
             config: {
                 systemInstruction: systemPrompt,
                 responseMimeType: "application/json",

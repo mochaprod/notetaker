@@ -1,0 +1,20 @@
+{
+    "summary": "You will cook a few dishes for Thanksgiving.",
+    "tasks": [
+        {
+            "noteId": "abc",
+            "content": "Cook turkey"
+        },
+        {
+            "noteId": "def",
+            "content": "Make mac and cheese"
+        },
+        {
+            "noteId": "ghi",
+            "content": "Braise short ribs"
+        }
+    ],
+    "themes": [],
+    "corrections": [],
+    "followUps": []
+}

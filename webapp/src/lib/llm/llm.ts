@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Note } from "../db/db";
 
 export const ThemesSchema = z.object({
 	name: z.string(),
@@ -9,6 +10,9 @@ export const ThemesSchema = z.object({
 export const TaskSchema = z.object({
     noteId: z.string().optional(),
     content: z.string(),
+    theme: z.string().nullable(),
+    date: z.iso.date().nullish(),
+    important: z.boolean().default(false),
 });
 
 export const CorrectionSchema = z.object({
@@ -28,5 +32,5 @@ export const SummaryResponseSchema = z.object({
 export type SummaryResponse = z.infer<typeof SummaryResponseSchema>;
 
 export interface LLM {
-    summarize(content: string): Promise<SummaryResponse | undefined>;
+    summarize(notes: Note[]): Promise<SummaryResponse>;
 }
