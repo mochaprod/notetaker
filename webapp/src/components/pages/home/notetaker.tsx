@@ -1,15 +1,11 @@
-'use client';
+"use client";
 
-import { Separator } from "@/components/ui/separator";
 import { Note } from "@/lib/db/db";
+import { addDays, isBefore, isSameDay, startOfDay } from "date-fns";
 import { useCallback, useState } from "react";
+import { DateSelector } from "./date-selector";
 import { Notes } from "./notes";
 import { NotesForm } from "./notes-form";
-import { Summarizer } from "./summarizer";
-import clsx from "clsx";
-import { SummaryResponse, SummaryResponseSchema } from "@/lib/llm/llm";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 
 export interface NoteTakerProps {
     initialNotes?: Note[];
@@ -17,7 +13,7 @@ export interface NoteTakerProps {
 
 export function NoteTaker({ initialNotes }: NoteTakerProps) {
     const [notes, setNotes] = useState<Note[]>(initialNotes || []);
-    const [aiSummary, setAISummary] = useState<SummaryResponse>();
+    const [currentDate, setCurrentDate] = useState<Date>(startOfDay(new Date()));
 
     const addNoteOptimistically = useCallback((note: Note) => {
         setNotes((prevNotes) => [...prevNotes, note]);
@@ -36,58 +32,34 @@ export function NoteTaker({ initialNotes }: NoteTakerProps) {
     const deleteNoteOptimistically = useCallback((id: string) => {
         setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id));
     }, []);
+    const addDaysToDate = useCallback((offset: number) => {
+        setCurrentDate((prevDate) => {
+            const nextDate = addDays(prevDate, offset);
+            const today = new Date();
 
-    const summarize = useCallback(async () => {
-        const response = await fetch("/api/summarize");
-
-        if (response.ok) {
-            const json = await response.json();
-
-            setAISummary(SummaryResponseSchema.parse(json));
-        }
+            return isBefore(nextDate, today) || isSameDay(nextDate, today)
+                ? nextDate
+                : prevDate;
+        });
     }, []);
 
     return (
         <main
-            className="flex justify-center gap-2 container mx-auto"
+            className="flex flex-col justify-center gap-5 min-w-md max-w-md mx-auto"
         >
-            <div
-                className={ clsx("flex flex-col gap-2", "min-w-md max-w-md") }
-            >
-                <Notes
-                    notes={ notes }
-                    updateNoteOptimistically={ updateNoteOptimistically }
-                    deleteNoteOptimistically={ deleteNoteOptimistically }
-                />
-                <Separator />
-                <NotesForm
-                    addNoteOptimistic={ addNoteOptimistically }
-                />
-                <Summarizer
-                    summarize={ summarize }
-                />
-            </div>
-            { aiSummary && (
-                <div
-                    className="min-w-md"
-                >
-                    <ul>
-                        { aiSummary.tasks.map((task) => (
-                            <div
-                                key={ task.content }
-                                className="flex items-center gap-2"
-                            >
-                                <Checkbox id={ task.content } />
-                                <Label
-                                    htmlFor={ task.content }
-                                >
-                                    { task.content }
-                                </Label>
-                            </div>
-                        )) }
-                    </ul>
-                </div>
-            ) }
+            <NotesForm
+                addNoteOptimistic={ addNoteOptimistically }
+            />
+            <DateSelector
+                currentDate={ currentDate }
+                addDaysToDate={ addDaysToDate }
+                setSelectedDate={ setCurrentDate }
+            />
+            <Notes
+                notes={ notes }
+                updateNoteOptimistically={ updateNoteOptimistically }
+                deleteNoteOptimistically={ deleteNoteOptimistically }
+            />
         </main>
     );
 }

@@ -5,10 +5,35 @@ import { Input } from "@/components/ui/input";
 import { SummaryResponse, SummaryResponseSchema } from "@/lib/llm/llm";
 import { useQuery } from "@tanstack/react-query";
 import { PlusIcon, SendHorizonalIcon, StarIcon, WandSparklesIcon } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, stagger } from "motion/react";
 import { DigestSplash } from "./digest-splash";
 
-import { Item, ItemActions, ItemContent, ItemTitle } from "@/components/ui/item";
+import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from "@/components/ui/item";
+import { Badge } from "@/components/ui/badge";
+
+const containerAnimations = {
+    hidden: {
+        opacity: 0,
+    },
+    show: {
+        opacity: 1,
+        transition: {
+            delay: 0.1,
+            delayChildren: stagger(0.125),
+        },
+    },
+};
+
+const childAnimations = {
+    hidden: {
+        opacity: 0,
+        y: 20,
+    },
+    show: {
+        opacity: 1,
+        y: 0,
+    },
+};
 
 export function Digest() {
     const summary = useQuery<SummaryResponse>({
@@ -79,15 +104,16 @@ export function Digest() {
                                     >
                                         Suggested Action Items
                                     </h2>
-                                    <ul
+                                    <motion.ul
+                                        variants={ containerAnimations }
+                                        initial="hidden"
+                                        animate="show"
                                         className="flex flex-col gap-2"
                                     >
                                         { summary.data?.tasks.map((task, i) => (
                                             <motion.li
                                                 key={ i }
-                                                initial={{ opacity: 0, y: 20 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                transition={{ delay: 0.25 + i * 0.1 }}
+                                                variants={ childAnimations }
                                             >
                                                 <Item
                                                     variant="outline"
@@ -96,6 +122,13 @@ export function Digest() {
                                                         <ItemTitle>
                                                             { task.content }
                                                         </ItemTitle>
+                                                        { task.theme && (
+                                                            <ItemDescription>
+                                                                <Badge>
+                                                                    { task.theme }
+                                                                </Badge>
+                                                            </ItemDescription>
+                                                        ) }
                                                     </ItemContent>
                                                     <ItemActions
                                                         className="flex-col"
@@ -116,7 +149,7 @@ export function Digest() {
                                                 </Item>
                                             </motion.li>
                                         )) }
-                                    </ul>
+                                    </motion.ul>
                                 </section>
                             </div>
                             <div

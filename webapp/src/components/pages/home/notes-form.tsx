@@ -1,9 +1,8 @@
-'use client';
-
 import { addNote } from "@/app/actions/home/actions";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Note } from "@/lib/db/db";
+import { PenIcon } from "lucide-react";
 
 export interface NotesFormProps {
     addNoteOptimistic?: (message: Note) => void;
@@ -22,16 +21,20 @@ export function NotesForm({ addNoteOptimistic }: NotesFormProps) {
     return (
         <form action={ submitForm }>
             <div
-                className="flex gap-2"
+                className="flex flex-col gap-2"
             >
                 <Textarea
                     name="message"
                     placeholder="What's on your mind?"
+                    className="md:text-xl leading-relaxed min-h-[275px]"
                 />
                 <Button
                     type="submit"
-                    className="h-auto"
-                >Write</Button>
+                    size="lg"
+                >
+                    <PenIcon />
+                    Write
+                </Button>
             </div>
         </form>
     );
