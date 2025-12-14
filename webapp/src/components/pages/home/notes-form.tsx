@@ -1,25 +1,28 @@
-import { addNote } from "@/app/actions/home/actions";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Note } from "@/lib/db/db";
 import { PenIcon } from "lucide-react";
+import { useRef } from "react";
 
 export interface NotesFormProps {
-    addNoteOptimistic?: (message: Note) => void;
+    addNewNote: (noteText: string) => void;
 }
 
-export function NotesForm({ addNoteOptimistic }: NotesFormProps) {
-    const submitForm = async (formData: FormData) => {
-        const text = formData.get("message") as string;
-        const note = await addNote(text);
+export function NotesForm({ addNewNote }: NotesFormProps) {
+    const formRef = useRef<HTMLFormElement>(null);
 
-        if (note) {
-            addNoteOptimistic?.(note);
+    const submitForm = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        const formData = new FormData(event.currentTarget);
+        const text = formData.get("message") as string;
+
+        if (text) {
+            addNewNote(text);
+            formRef.current?.reset();
         }
     };
 
     return (
-        <form action={ submitForm }>
+        <form ref={formRef} onSubmit={ submitForm }>
             <div
                 className="flex flex-col gap-2"
             >

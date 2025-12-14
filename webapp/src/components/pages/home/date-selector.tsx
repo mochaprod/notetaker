@@ -8,13 +8,13 @@ import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 interface DateSelectorProps {
     currentDate: Date;
     addDaysToDate: (offsetInDays: number) => void;
-    setSelectedDate: (date: Date) => void;
+    selectDate: (date: Date) => void;
 }
 
 export function DateSelector({
     currentDate,
     addDaysToDate,
-    setSelectedDate,
+    selectDate,
 }: DateSelectorProps) {
     return (
         <div
@@ -42,7 +42,8 @@ export function DateSelector({
                     <Calendar
                         mode="single"
                         selected={ currentDate }
-                        onSelect={ (date) => date && setSelectedDate(date) }
+                        disabled={{ after: new Date() }}
+                        onSelect={ (date) => date && selectDate(date) }
                     />
                 </PopoverContent>
             </Popover>

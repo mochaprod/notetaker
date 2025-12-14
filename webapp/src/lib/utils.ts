@@ -35,11 +35,11 @@ export function formatRelativeTime(date: Date, fineGrained?: boolean): string {
             }
             return format(date, "p"); // e.g., 3:30 PM
         }
-        return "Today";
+        return `Today at ${format(date, "p")}`;
     }
 
     if (diffInDays === 1) {
-        return "Yesterday";
+        return `Yesterday at ${format(date, "p")}`;
     }
 
     if (diffInDays < 5) {

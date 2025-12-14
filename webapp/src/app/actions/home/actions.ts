@@ -1,7 +1,7 @@
 "use server";
 
 import { Note } from "@/lib/db/db";
-import { db } from "@/lib/db/db-instance";
+import { noteRepository } from "@/lib/db/db-instance";
 import { createEmbeddingsClient } from "@/lib/embeddings/factory";
 import { createVectorDBClient } from "@/lib/vector/client";
 
@@ -13,7 +13,7 @@ export async function addNote(data: string): Promise<Note | null> {
     const embeddingsClient = createEmbeddingsClient();
     const vectorDBClient = await createVectorDBClient();
 
-    const note = await db.putNotes("default", data.trim());
+    const note = await noteRepository.putNotes("default", data.trim());
     const embeddings = await embeddingsClient.generateEmbeddings(note.message);
 
     console.log("Generated embeddings:", embeddings);
@@ -30,7 +30,7 @@ export async function editNote(id: string, content: string): Promise<void> {
     const embeddingsClient = createEmbeddingsClient();
     const vectorDBClient = await createVectorDBClient();
 
-    await db.updateNotes(id, content);
+    await noteRepository.updateNotes(id, content);
     const embeddings = await embeddingsClient.generateEmbeddings(content);
     await vectorDBClient.upsert([{
         id,
@@ -41,6 +41,6 @@ export async function editNote(id: string, content: string): Promise<void> {
 export async function deleteNote(id: string): Promise<void> {
     const vectorDBClient = await createVectorDBClient();
 
-    await db.deleteNotes(id);
+    await noteRepository.deleteNotes(id);
     await vectorDBClient.delete([id]);
 }

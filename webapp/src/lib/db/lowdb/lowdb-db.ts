@@ -1,24 +1,25 @@
 import { v7 as uuidv7 } from "uuid";
 import { LowSync } from "lowdb";
 import { JSONFileSync } from "lowdb/node";
-import { Note, DB } from "./db";
+import { Note, NoteRepository } from "../db";
+import { isSameDay } from "date-fns";
 
 const DEFAULT_DATA = {
     chatMessages: [] as Note[],
 };
 
-export class LowDBDB implements DB {
+export class LowDBNoteRepository implements NoteRepository {
     private db: LowSync<typeof DEFAULT_DATA>;
 
     constructor(file: string) {
         this.db = new LowSync(new JSONFileSync(file), DEFAULT_DATA);
     }
 
-    async getNotes(key: string): Promise<Note[]> {
+    async getNotes(key: string, date?: Date): Promise<Note[]> {
         this.db.read();
         const data = this.db.data?.chatMessages
-            .filter(msg => msg.key === key)
-            .toSorted((a, b) => a.createdAt.localeCompare(b.createdAt)) || [];
+            .filter(msg => msg.key === key && (!date || isSameDay(msg.createdAt, date)))
+            .toSorted((a, b) => b.createdAt.localeCompare(a.createdAt)) || [];
 
         return data;
     }
