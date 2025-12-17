@@ -47,6 +47,7 @@ export function Digest() {
         refetchOnMount: false,
         refetchOnWindowFocus: false,
         refetchInterval: false,
+        retry: false,
     });
 
     return (
@@ -71,7 +72,7 @@ export function Digest() {
                             <h1
                                 className="text-4xl font-mono font-bold"
                             >
-                                Digest
+                                Daily Summary
                             </h1>
                             <div
                                 className="flex flex-col gap-6"
@@ -123,10 +124,17 @@ export function Digest() {
                                                             { task.content }
                                                         </ItemTitle>
                                                         { task.theme && (
-                                                            <ItemDescription>
+                                                            <ItemDescription
+                                                                className="flex gap-1"
+                                                            >
                                                                 <Badge>
                                                                     { task.theme }
                                                                 </Badge>
+                                                                { task.datetime && (
+                                                                    <Badge>
+                                                                        { new Date(task.datetime).toISOString() }
+                                                                    </Badge>
+                                                                ) }
                                                             </ItemDescription>
                                                         ) }
                                                     </ItemContent>

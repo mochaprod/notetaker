@@ -11,9 +11,11 @@ export const TaskSchema = z.object({
     noteId: z.string().optional(),
     content: z.string(),
     theme: z.string().nullable(),
-    date: z.iso.date().nullish(),
+    datetime: z.iso.datetime().nullish(),
     important: z.boolean().default(false),
 });
+
+export type Task = z.infer<typeof TaskSchema>;
 
 export const CorrectionSchema = z.object({
     noteId: z.string(),
