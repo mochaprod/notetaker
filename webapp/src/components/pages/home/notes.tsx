@@ -9,6 +9,7 @@ import { Note } from "@/lib/db/db";
 import { CheckIcon, MoreHorizontalIcon, PenIcon, TrashIcon, XIcon } from "lucide-react";
 import { useState } from "react";
 import { formatRelativeTime } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
 
 export interface NotesProps {
     notes: Note[];
@@ -23,6 +24,16 @@ export function Notes({
     updateNoteOptimistically,
     deleteNoteOptimistically,
 }: NotesProps) {
+    const { data: now } = useQuery({
+        queryKey: ["now"],
+        queryFn: () => {
+            console.log("refetching lol");
+            return new Date();
+        },
+        refetchInterval: 60000,
+        refetchOnWindowFocus: "always",
+        initialData: new Date(),
+    });
     const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
     const [editingValue, setEditingValue] = useState("");
 
@@ -96,10 +107,10 @@ export function Notes({
                         <div
                             className="text-xs text-muted-foreground flex"
                         >
-                            { formatRelativeTime(new Date(createdAt), true) }
+                            { formatRelativeTime(new Date(createdAt), now) }
                         </div>
                         <Card
-                            className="py-4"
+                            className="py-2"
                         >
                             <CardContent
                                 className="flex justify-between items-center gap-2 px-5 text-md"

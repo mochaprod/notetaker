@@ -1,9 +1,20 @@
 import { clsx, type ClassValue } from "clsx";
-import { differenceInDays, differenceInMinutes, format, formatDistanceToNow, startOfDay } from "date-fns";
+import { differenceInDays, differenceInMinutes, format, formatDistance, formatDistanceToNow, startOfDay } from "date-fns";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
+}
+
+export function formatRelativeTime(from: Date, to: Date): string {
+    const diffInMinutes = differenceInMinutes(to, from);
+    if (diffInMinutes < 1) {
+        return "just now";
+    } else if (diffInMinutes < 60) {
+        return formatDistance(from, to, { addSuffix: true });
+    }
+
+    return format(from, "p"); // e.g., 3:30 PM
 }
 
 /**
@@ -23,7 +34,7 @@ export function cn(...inputs: ClassValue[]) {
  * @param fineGrained Whether to use more specific time formats for recent dates.
  * @returns A formatted string.
  */
-export function formatRelativeTime(date: Date, fineGrained?: boolean): string {
+export function formatRelativeDateTime(date: Date, fineGrained?: boolean): string {
     const now = new Date();
     const diffInDays = differenceInDays(startOfDay(now), startOfDay(date));
 

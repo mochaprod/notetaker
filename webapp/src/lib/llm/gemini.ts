@@ -48,7 +48,7 @@ export class Gemini implements LLM {
             throw new Error("Failed to get JSON summary.");
         }
 
-        LOGGER.info(response.text);
+        LOGGER.debug(response.text);
 
         return SummaryResponseSchema.parse(JSON.parse(response.text));
     }
@@ -94,8 +94,6 @@ export class Gemini implements LLM {
                     const { name, args } = fnCall;
 
                     const tool = LLM_TOOLS.find((tool) => tool.name === name);
-
-                    LOGGER.info(`Calling function ${name}.`);
 
                     if (tool) {
                         const functionCallResult = tool.call(args);
