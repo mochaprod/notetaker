@@ -10,6 +10,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchNotesByDate } from "@/lib/api";
 import { addNote, editNote, deleteNote } from "@/app/actions/home/actions";
+import { authClient } from "@/lib/auth-client";
 
 function dateString(date: Date): string {
     try {

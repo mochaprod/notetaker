@@ -1,0 +1,25 @@
+{
+  "name": "@db/prisma",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "types": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.26.1",
+  "devDependencies": {
+    "@types/node": "^20.19.27",
+    "@types/pg": "^8.16.0",
+    "dotenv": "^17.2.3",
+    "prisma": "^7.2.0"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.2.0",
+    "@prisma/client": "^7.2.0",
+    "pg": "^8.16.3"
+  }
+}
