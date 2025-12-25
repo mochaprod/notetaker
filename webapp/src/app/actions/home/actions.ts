@@ -1,22 +1,29 @@
 "use server";
 
+import { auth } from "@/lib/auth";
 import { Note } from "@/lib/db/db";
 import { noteRepository } from "@/lib/db/db-instance";
 import { createEmbeddingsClient } from "@/lib/embeddings/factory";
+import { LOGGER } from "@/lib/logger";
 import { createVectorDBClient } from "@/lib/vector/client";
+import { headers } from "next/headers";
 
 export async function addNote(data: string): Promise<Note | null> {
-    if (!data || data.trim().length === 0) {
+    const session = await auth.api.getSession({
+        headers: await headers(),
+    });
+
+    if (!session || !data || data.trim().length === 0) {
         return null;
     }
 
     const embeddingsClient = createEmbeddingsClient();
     const vectorDBClient = await createVectorDBClient();
 
-    const note = await noteRepository.putNotes("default", data.trim());
+    const note = await noteRepository.putNotes(session.user.id, data.trim());
     const embeddings = await embeddingsClient.generateEmbeddings(note.message);
 
-    console.log("Generated embeddings:", embeddings);
+    LOGGER.info(embeddings, "Generated embeddings");
 
     await vectorDBClient.add([{
         id: note.id,

@@ -92,11 +92,10 @@ export function SignUpForm({
                             name="name"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Full Name</FormLabel>
+                                    <FormLabel>Your Name</FormLabel>
                                     <FormControl>
                                         <Input
                                             type="text"
-                                            placeholder="John Doe"
                                             {...field}
                                         />
                                     </FormControl>

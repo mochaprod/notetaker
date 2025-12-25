@@ -10,6 +10,7 @@ import { DigestSplash } from "./digest-splash";
 
 import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from "@/components/ui/item";
 import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
 
 const containerAnimations = {
     hidden: {
@@ -118,6 +119,7 @@ export function Digest() {
                                             >
                                                 <Item
                                                     variant="outline"
+                                                    size="sm"
                                                 >
                                                     <ItemContent>
                                                         <ItemTitle>
@@ -132,7 +134,7 @@ export function Digest() {
                                                                 </Badge>
                                                                 { task.datetime && (
                                                                     <Badge>
-                                                                        { new Date(task.datetime).toISOString() }
+                                                                        { format(new Date(task.datetime), "LLL d") }
                                                                     </Badge>
                                                                 ) }
                                                             </ItemDescription>

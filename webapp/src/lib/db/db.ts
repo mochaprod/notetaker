@@ -11,7 +11,7 @@ export type Note = z.infer<typeof NoteSchema>;
 
 export interface NoteRepository {
     putNotes: (key: string, value: string) => Promise<Note>;
-    getNotes: (key: string, date?: Date) => Promise<Note[]>;
+    getNotes: (key: string, startDate?: Date, endDate?: Date) => Promise<Note[]>;
     updateNotes: (key: string, value: string) => Promise<void>;
     deleteNotes: (key: string) => Promise<void>;
 }

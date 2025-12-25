@@ -1,3 +1,4 @@
-import { LowDBNoteRepository } from "./lowdb/lowdb-db";
+import { prisma } from "@db/prisma";
+import { PostgresqlNoteRepository } from "./postgresql/postgresql-db";
 
-export const noteRepository = new LowDBNoteRepository("./.db/db.json");
+export const noteRepository = new PostgresqlNoteRepository(prisma);
