@@ -1,16 +1,17 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { SummaryResponse, SummaryResponseSchema } from "@/lib/llm/llm";
-import { useQuery } from "@tanstack/react-query";
-import { PlusIcon, SendHorizonalIcon, StarIcon, WandSparklesIcon } from "lucide-react";
-import { AnimatePresence, motion, stagger } from "motion/react";
-import { DigestSplash } from "./digest-splash";
-
 import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from "@/components/ui/item";
-import { Badge } from "@/components/ui/badge";
+import { formatDate } from "@/lib/llm/tools";
+import { Summary, SummarySchema } from "@common/types/summary";
+import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
+import { SendHorizonalIcon, WandSparklesIcon } from "lucide-react";
+import { AnimatePresence, motion, stagger } from "motion/react";
+import { ActionMenu } from "../home/components/action-menu";
+import { DigestSplash } from "./digest-splash";
 
 const containerAnimations = {
     hidden: {
@@ -37,19 +38,29 @@ const childAnimations = {
 };
 
 export function Digest() {
-    const summary = useQuery<SummaryResponse>({
+    const summary = useQuery<Summary>({
         queryKey: ["summary"],
         queryFn: async () => {
-            const response = await fetch("/api/summarize");
+            const today = new Date();
+            const key = formatDate(today);
+            const params = new URLSearchParams({
+                start: key,
+                end: key,
+            });
+            const response = await fetch(`/api/summarize?${params.toString()}`);
             const data = await response.json();
 
-            return SummaryResponseSchema.parseAsync(data);
+            console.log(data);
+
+            return SummarySchema.parseAsync(data);
         },
         refetchOnMount: false,
         refetchOnWindowFocus: false,
         refetchInterval: false,
         retry: false,
     });
+
+    console.log(summary.error);
 
     return (
         <main
@@ -134,7 +145,7 @@ export function Digest() {
                                                                 </Badge>
                                                                 { task.datetime && (
                                                                     <Badge>
-                                                                        { format(new Date(task.datetime), "LLL d") }
+                                                                        { format(task.datetime, "LLL d") }
                                                                     </Badge>
                                                                 ) }
                                                             </ItemDescription>
@@ -143,18 +154,9 @@ export function Digest() {
                                                     <ItemActions
                                                         className="flex-col"
                                                     >
-                                                        <Button
-                                                            variant="outline"
-                                                            size="icon-sm"
-                                                        >
-                                                            <StarIcon />
-                                                        </Button>
-                                                        <Button
-                                                            variant="outline"
-                                                            size="icon-sm"
-                                                        >
-                                                            <PlusIcon />
-                                                        </Button>
+                                                        <ActionMenu
+                                                            date={ task.datetime ? new Date(task.datetime) : undefined }
+                                                        />
                                                     </ItemActions>
                                                 </Item>
                                             </motion.li>

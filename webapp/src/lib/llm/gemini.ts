@@ -1,11 +1,11 @@
+import { Note } from "@common/types/notes";
 import { Content, GoogleGenAI } from "@google/genai";
 import fs from "fs";
 import mustache from "mustache";
 import path from "path";
 import z from "zod";
-import { Note } from "../db/db";
 import { LOGGER } from "../logger";
-import { LLM, SummaryResponse, SummaryResponseSchema } from "./llm";
+import { LLM, LLMSummary, LLMSummarySchema } from "./llm";
 import { addDaysTool, addDaysToolDefinition, nextDayTool, nextDayToolDefinition } from "./tools/date";
 import { LLMTool } from "./tools/tool";
 
@@ -22,14 +22,14 @@ export class Gemini implements LLM {
         this.genai = new GoogleGenAI({});
     }
 
-    async summarize(notes: Note[]): Promise<SummaryResponse> {
+    async summarize(notes: Note[]): Promise<LLMSummary> {
         const textSummary = await this.createTextSummary(notes);
         LOGGER.debug(textSummary);
 
         return this.createJSONSummary(textSummary);
     }
 
-    private async createJSONSummary(textSummary: string): Promise<SummaryResponse> {
+    private async createJSONSummary(textSummary: string): Promise<LLMSummary> {
         const jsonSummaryPrompt = mustache.render(systemPromptJson, {
             document: textSummary,
         });
@@ -39,7 +39,7 @@ export class Gemini implements LLM {
             contents: jsonSummaryPrompt,
             config: {
                 responseMimeType: "application/json",
-                responseJsonSchema: z.toJSONSchema(SummaryResponseSchema),
+                responseJsonSchema: z.toJSONSchema(LLMSummarySchema),
             },
         });
 
@@ -50,7 +50,7 @@ export class Gemini implements LLM {
 
         LOGGER.debug(response.text);
 
-        return SummaryResponseSchema.parse(JSON.parse(response.text));
+        return LLMSummarySchema.parse(JSON.parse(response.text));
     }
 
     private async createTextSummary(notes: Note[]): Promise<string> {

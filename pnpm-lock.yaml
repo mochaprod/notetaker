@@ -37,11 +37,20 @@ importers:
         specifier: ^7.2.0
         version: 7.2.0(@types/react@19.2.7)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(typescript@5.9.3)
 
+  packages/types:
+    dependencies:
+      zod:
+        specifier: ^4.2.1
+        version: 4.2.1
+
   webapp:
     dependencies:
       '@chroma-core/default-embed':
         specifier: ^0.1.9
         version: 0.1.9
+      '@common/types':
+        specifier: workspace:*
+        version: link:../packages/types
       '@db/prisma':
         specifier: workspace:*
         version: link:../packages/prisma

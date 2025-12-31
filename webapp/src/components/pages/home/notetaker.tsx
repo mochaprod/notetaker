@@ -1,6 +1,5 @@
 "use client";
 
-import { Note } from "@/lib/db/db";
 import { addDays, format, isBefore, isSameDay, parse, startOfDay } from "date-fns";
 import { useCallback } from "react";
 import { DateSelector } from "./date-selector";
@@ -10,6 +9,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchNotesByDate } from "@/lib/api";
 import { addNote, editNote, deleteNote } from "@/app/actions/home/actions";
+import { Note } from "@common/types/notes";
 import { authClient } from "@/lib/auth-client";
 
 function dateString(date: Date): string {
@@ -39,6 +39,7 @@ export function NoteTaker() {
     const currentDate = parseDate(searchParams.get("date"));
     const currentDateQueryKey = ["notes", dateString(currentDate)];
     const todayQueryKey = ["notes", dateString(startOfDay(new Date()))];
+    const session = authClient.useSession();
 
     const { data: notes, isLoading } = useQuery({
         queryKey: currentDateQueryKey,
@@ -117,6 +118,9 @@ export function NoteTaker() {
 
     return (
         <main className="flex flex-col justify-center gap-5 min-w-md max-w-md mx-auto">
+            <div>
+                Welcome, { session?.data?.user.name }
+            </div>
             <NotesForm
                 addNewNote={ (text) => addNoteMutation.mutate(text) }
             />

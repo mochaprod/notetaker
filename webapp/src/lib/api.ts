@@ -1,5 +1,5 @@
+import { Note, NoteSchema } from "@common/types/notes";
 import z from "zod";
-import { Note, NoteSchema } from "./db/db";
 
 export const NotesResponseSchema = z.object({
     notes: z.array(NoteSchema),

@@ -1,13 +1,5 @@
-import z from "zod";
-
-export const NoteSchema = z.object({
-    id: z.string(),
-    key: z.string(),
-    message: z.string(),
-    createdAt: z.iso.datetime(),
-});
-
-export type Note = z.infer<typeof NoteSchema>;
+import { Note } from "@common/types/notes";
+import { Summary } from "@common/types/summary";
 
 export interface NoteRepository {
     putNotes: (key: string, value: string) => Promise<Note>;
@@ -17,4 +9,6 @@ export interface NoteRepository {
 }
 
 export interface DigestRepository {
+    putSummary: (userId: string, startDateKey: string, endDateKey: string, summary: Omit<Summary, "id" | "startDate" | "endDate">) => Promise<Summary>;
+    getSummary: (userId: string, startDateKey: string, endDateKey: string) => Promise<Summary | null>;
 }

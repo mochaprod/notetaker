@@ -1,0 +1,19 @@
+{
+  "name": "@common/types",
+  "version": "1.0.0",
+  "description": "",
+  "exports": {
+    "./notes": "./src/notes/index.ts",
+    "./summary": "./src/summary/index.ts"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.26.1",
+  "dependencies": {
+    "zod": "^4.2.1"
+  }
+}
