@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useNow } from "@/hooks/use-now";
 import clsx from "clsx";
-import { format, isToday, startOfDay, subDays } from "date-fns";
+import { format, isToday, subDays } from "date-fns";
 import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 
 interface DateSelectorProps {
@@ -16,7 +17,7 @@ export function DateSelector({
     addDaysToDate,
     selectDate,
 }: DateSelectorProps) {
-    const today = startOfDay(new Date());
+    const now = useNow();
 
     return (
         <div
@@ -35,7 +36,7 @@ export function DateSelector({
                     <Button
                         variant="outline"
                     >
-                        { format(currentDate, "PP") }
+                        { format(currentDate, "LLL d") }
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent
@@ -47,14 +48,14 @@ export function DateSelector({
                         <Button
                             size="xs"
                             variant="outline"
-                            onClick={ () => selectDate(today) }
+                            onClick={ () => selectDate(now.data) }
                         >
                             Today
                         </Button>
                         <Button
                             size="xs"
                             variant="outline"
-                            onClick={ () => selectDate(subDays(today, 2)) }
+                            onClick={ () => selectDate(subDays(now.data, 1)) }
                         >
                             Yesterday
                         </Button>

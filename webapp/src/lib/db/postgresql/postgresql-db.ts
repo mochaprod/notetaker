@@ -56,9 +56,21 @@ export class PostgresqlNoteRepository implements NoteRepository {
     }
 
     async updateNotes(key: string, value: string): Promise<void> {
-        throw new Error("Method not implemented.");
+        await this.prisma.note.update({
+            where: {
+                id: key,
+            },
+            data: {
+                message: value,
+            },
+        });
     }
+
     async deleteNotes(key: string): Promise<void> {
-        throw new Error("Method not implemented.");
+        await this.prisma.note.delete({
+            where: {
+                id: key,
+            },
+        });
     }
 }

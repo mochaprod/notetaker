@@ -1,11 +1,11 @@
 "use server";
 
 import { auth } from "@/lib/auth";
-import { Note } from "@/lib/db/db";
 import { noteRepository } from "@/lib/db/db-instance";
 import { createEmbeddingsClient } from "@/lib/embeddings/factory";
 import { LOGGER } from "@/lib/logger";
 import { createVectorDBClient } from "@/lib/vector/client";
+import { Note } from "@common/types/notes";
 import { headers } from "next/headers";
 
 export async function addNote(data: string): Promise<Note | null> {

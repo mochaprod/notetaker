@@ -1,5 +1,5 @@
 import { clsx, type ClassValue } from "clsx";
-import { differenceInDays, differenceInMinutes, format, formatDistance, formatDistanceToNow, startOfDay } from "date-fns";
+import { differenceInDays, differenceInMinutes, format, formatDistance, formatDistanceToNow, parse, startOfDay } from "date-fns";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -58,4 +58,16 @@ export function formatRelativeDateTime(date: Date, fineGrained?: boolean): strin
     }
 
     return format(date, "LLL d");
+}
+
+export function parseDate(dateStr: string | null): Date {
+    if (dateStr) {
+        const date = parse(dateStr, "yyyy-MM-dd", new Date());
+
+        if (!isNaN(date.getTime())) {
+            return date;
+        }
+    }
+
+    return startOfDay(new Date());
 }

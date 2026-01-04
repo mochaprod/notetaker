@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
-import { Note } from "@/lib/db/db";
 import { CheckIcon, MoreHorizontalIcon, PenIcon, TrashIcon, XIcon } from "lucide-react";
 import { useState } from "react";
 import { formatRelativeTime } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
+import { Note } from "@common/types/notes";
+import { useNow } from "@/hooks/use-now";
 
 export interface NotesProps {
     notes: Note[];
@@ -24,16 +25,7 @@ export function Notes({
     updateNoteOptimistically,
     deleteNoteOptimistically,
 }: NotesProps) {
-    const { data: now } = useQuery({
-        queryKey: ["now"],
-        queryFn: () => {
-            console.log("refetching lol");
-            return new Date();
-        },
-        refetchInterval: 60000,
-        refetchOnWindowFocus: "always",
-        initialData: new Date(),
-    });
+    const { data: now } = useNow();
     const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
     const [editingValue, setEditingValue] = useState("");
 

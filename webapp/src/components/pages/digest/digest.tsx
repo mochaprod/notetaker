@@ -1,5 +1,6 @@
 "use client";
 
+import { QueryParamsDateSelector } from "@/components/custom/query-params-date-selector";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +8,7 @@ import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from "@/co
 import { formatDate } from "@/lib/llm/tools";
 import { Summary, SummarySchema } from "@common/types/summary";
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { endOfDay, format, startOfDay } from "date-fns";
 import { SendHorizonalIcon, WandSparklesIcon } from "lucide-react";
 import { AnimatePresence, motion, stagger } from "motion/react";
 import { ActionMenu } from "../home/components/action-menu";
@@ -42,15 +43,12 @@ export function Digest() {
         queryKey: ["summary"],
         queryFn: async () => {
             const today = new Date();
-            const key = formatDate(today);
             const params = new URLSearchParams({
-                start: key,
-                end: key,
+                start: startOfDay(today).toISOString(),
+                end: endOfDay(today).toISOString(),
             });
             const response = await fetch(`/api/summarize?${params.toString()}`);
             const data = await response.json();
-
-            console.log(data);
 
             return SummarySchema.parseAsync(data);
         },
@@ -59,8 +57,6 @@ export function Digest() {
         refetchInterval: false,
         retry: false,
     });
-
-    console.log(summary.error);
 
     return (
         <main
@@ -86,6 +82,7 @@ export function Digest() {
                             >
                                 Daily Summary
                             </h1>
+                            <QueryParamsDateSelector />
                             <div
                                 className="flex flex-col gap-6"
                             >

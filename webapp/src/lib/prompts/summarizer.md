@@ -26,7 +26,7 @@ A brief overview of the main topics and themes present in the information provid
 A bulleted list of clear, actionable tasks. Order action items based on importance. For each item, extract metadata. Metadata should be contained in a JSON code block. Fields that need to be extracted:
 
 - `theme` (nullable): a string value categorizing the task. Only include it if it can be categorized with high confidence. Use a single word.
-- `datetime` (nullable): If a due date, day, or time is mentioned when to complete the task, calculate the date (IMPORTANT: MUST use available tools) from the note creation date and show it in ISO 8601 date format and preserve the time component (for timezone conversation on the client side).
+- `datetime` (nullable): If a due date, day, or time is mentioned when to complete the task, calculate the date (IMPORTANT: MUST use available tools) from the note creation date and show it in ISO 8601 date format and preserve the time component (for timezone conversation on the client side). Remove any mention of the date/day/time from the note in the output. This metadata should contain enough information to identify the date.
 - `noteIds` (not-null, default: `[]`): Reference the note IDs that are associated with this task item.
 
 ### Follow-up Questions

@@ -1,44 +1,24 @@
 "use client";
 
-import { addDays, format, isBefore, isSameDay, parse, startOfDay } from "date-fns";
-import { useCallback } from "react";
-import { DateSelector } from "./date-selector";
+import { addNote, deleteNote, editNote } from "@/app/actions/home/actions";
+import { QueryParamsDateSelector } from "@/components/custom/query-params-date-selector";
+import { fetchNotesByDate } from "@/lib/api";
+import { authClient } from "@/lib/auth-client";
+import { formatDate } from "@/lib/llm/tools";
+import { parseDate } from "@/lib/utils";
+import { Note } from "@common/types/notes";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { startOfDay } from "date-fns";
+import { useSearchParams } from "next/navigation";
 import { Notes } from "./notes";
 import { NotesForm } from "./notes-form";
-import { useSearchParams, useRouter } from "next/navigation";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchNotesByDate } from "@/lib/api";
-import { addNote, editNote, deleteNote } from "@/app/actions/home/actions";
-import { Note } from "@common/types/notes";
-import { authClient } from "@/lib/auth-client";
-
-function dateString(date: Date): string {
-    try {
-        return format(date, "yyyy-MM-dd");
-    } catch (e) {
-        return format(startOfDay(new Date()), "yyyy-MM-dd");
-    }
-}
-
-function parseDate(dateStr: string | null): Date {
-    if (dateStr) {
-        const date = parse(dateStr, "yyyy-MM-dd", new Date());
-
-        if (!isNaN(date.getTime())) {
-            return date;
-        }
-    }
-
-    return startOfDay(new Date());
-}
 
 export function NoteTaker() {
     const queryClient = useQueryClient();
     const searchParams = useSearchParams();
-    const router = useRouter();
     const currentDate = parseDate(searchParams.get("date"));
-    const currentDateQueryKey = ["notes", dateString(currentDate)];
-    const todayQueryKey = ["notes", dateString(startOfDay(new Date()))];
+    const currentDateQueryKey = ["notes", formatDate(currentDate)];
+    const todayQueryKey = ["notes", formatDate(startOfDay(new Date()))];
     const session = authClient.useSession();
 
     const { data: notes, isLoading } = useQuery({
@@ -100,22 +80,6 @@ export function NoteTaker() {
         },
     });
 
-    const addDaysToDate = useCallback((offset: number) => {
-        const nextDate = addDays(currentDate, offset);
-        const today = new Date();
-        const dateToSet = isBefore(nextDate, today) || isSameDay(nextDate, today) ? nextDate : currentDate;
-        router.push(`?date=${dateString(dateToSet)}`);
-    }, [currentDate, router]);
-
-    const selectDate = useCallback((date: Date) => {
-        try {
-            router.push(`?date=${dateString(date)}`);
-        } catch (e) {
-            console.error("Selected date is not formatted correctly.");
-            router.push("/");
-        }
-    }, [router]);
-
     return (
         <main className="flex flex-col justify-center gap-5 min-w-md max-w-md mx-auto">
             <div>
@@ -124,11 +88,7 @@ export function NoteTaker() {
             <NotesForm
                 addNewNote={ (text) => addNoteMutation.mutate(text) }
             />
-            <DateSelector
-                currentDate={ currentDate }
-                addDaysToDate={ addDaysToDate }
-                selectDate={ selectDate }
-            />
+            <QueryParamsDateSelector />
             <Notes
                 notes={ notes || [] }
                 isLoading={ isLoading }
