@@ -4,13 +4,20 @@ import { QueryParamsDateSelector } from "@/components/custom/query-params-date-s
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from "@/components/ui/item";
-import { formatDate } from "@/lib/llm/tools";
+import {
+    Item,
+    ItemActions,
+    ItemContent,
+    ItemDescription,
+    ItemTitle,
+} from "@/components/ui/item";
+import { useSearchParamsDate } from "@/hooks/use-search-params-date";
 import { Summary, SummarySchema } from "@common/types/summary";
 import { useQuery } from "@tanstack/react-query";
 import { endOfDay, format, startOfDay } from "date-fns";
 import { SendHorizonalIcon, WandSparklesIcon } from "lucide-react";
 import { AnimatePresence, motion, stagger } from "motion/react";
+import { useMemo } from "react";
 import { ActionMenu } from "../home/components/action-menu";
 import { DigestSplash } from "./digest-splash";
 
@@ -39,13 +46,13 @@ const childAnimations = {
 };
 
 export function Digest() {
+    const [currentDate, currentDateStr] = useSearchParamsDate();
     const summary = useQuery<Summary>({
-        queryKey: ["summary"],
+        queryKey: ["summary", currentDateStr],
         queryFn: async () => {
-            const today = new Date();
             const params = new URLSearchParams({
-                start: startOfDay(today).toISOString(),
-                end: endOfDay(today).toISOString(),
+                start: startOfDay(currentDate).toISOString(),
+                end: endOfDay(currentDate).toISOString(),
             });
             const response = await fetch(`/api/summarize?${params.toString()}`);
             const data = await response.json();
@@ -58,124 +65,97 @@ export function Digest() {
         retry: false,
     });
 
-    return (
-        <main
-            key="summary"
-            className="max-w-md w-full mx-auto"
-        >
-            <AnimatePresence
-                mode="wait"
-            >
-                { summary.isLoading
-                    ? (
-                        <DigestSplash
-                            key="splash"
-                        />
-                    )
-                    : (
-                        <motion.div
-                            key="content"
-                            className="flex flex-col gap-4"
+    const renderSummary = useMemo(
+        () =>
+            summary.data && summary.data.tasks ? (
+                <div className="flex flex-col gap-6">
+                    <motion.section
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5 }}
+                        className="flex flex-col gap-2 bg-primary/30 rounded-lg px-3.5 py-3"
+                    >
+                        <h2 className="flex gap-1 items-center text-xs font-semibold uppercase">
+                            <WandSparklesIcon className="w-4 h-4" />
+                            Summary
+                        </h2>
+                        <p className="leading-loose">{summary.data?.summary}</p>
+                    </motion.section>
+                    <section className="flex flex-col gap-3">
+                        <h2 className="text-xl font-semibold">
+                            Suggested Action Items
+                        </h2>
+                        <motion.ul
+                            variants={containerAnimations}
+                            initial="hidden"
+                            animate="show"
+                            className="flex flex-col gap-2"
                         >
-                            <h1
-                                className="text-4xl font-mono font-bold"
-                            >
-                                Daily Summary
-                            </h1>
-                            <QueryParamsDateSelector />
-                            <div
-                                className="flex flex-col gap-6"
-                            >
-                                <motion.section
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.5 }}
-                                    className="flex flex-col gap-2 bg-primary/30 rounded-lg px-3.5 py-3"
-                                >
-                                    <h2
-                                        className="flex gap-1 items-center text-xs font-semibold uppercase"
-                                    >
-                                        <WandSparklesIcon
-                                            className="w-4 h-4"
-                                        />
-                                        Summary
-                                    </h2>
-                                    <p
-                                        className="leading-loose"
-                                    >
-                                        { summary.data?.summary }
-                                    </p>
-                                </motion.section>
-                                <section
-                                    className="flex flex-col gap-3"
-                                >
-                                    <h2
-                                        className="text-xl font-semibold"
-                                    >
-                                        Suggested Action Items
-                                    </h2>
-                                    <motion.ul
-                                        variants={ containerAnimations }
-                                        initial="hidden"
-                                        animate="show"
-                                        className="flex flex-col gap-2"
-                                    >
-                                        { summary.data?.tasks.map((task, i) => (
-                                            <motion.li
-                                                key={ i }
-                                                variants={ childAnimations }
-                                            >
-                                                <Item
-                                                    variant="outline"
-                                                    size="sm"
-                                                >
-                                                    <ItemContent>
-                                                        <ItemTitle>
-                                                            { task.content }
-                                                        </ItemTitle>
-                                                        { task.theme && (
-                                                            <ItemDescription
-                                                                className="flex gap-1"
-                                                            >
-                                                                <Badge>
-                                                                    { task.theme }
-                                                                </Badge>
-                                                                { task.datetime && (
-                                                                    <Badge>
-                                                                        { format(task.datetime, "LLL d") }
-                                                                    </Badge>
-                                                                ) }
-                                                            </ItemDescription>
-                                                        ) }
-                                                    </ItemContent>
-                                                    <ItemActions
-                                                        className="flex-col"
-                                                    >
-                                                        <ActionMenu
-                                                            date={ task.datetime ? new Date(task.datetime) : undefined }
-                                                        />
-                                                    </ItemActions>
-                                                </Item>
-                                            </motion.li>
-                                        )) }
-                                    </motion.ul>
-                                </section>
-                            </div>
-                            <div
-                                className="flex gap-1"
-                            >
-                                <Input
-                                    placeholder="Ask your notes"
-                                />
-                                <Button
-                                    className="grow-0 self-end"
-                                >
-                                    <SendHorizonalIcon />
-                                </Button>
-                            </div>
-                        </motion.div>
-                    ) }
-            </AnimatePresence>
+                            {summary.data?.tasks.map((task, i) => (
+                                <motion.li key={i} variants={childAnimations}>
+                                    <Item variant="outline" size="sm">
+                                        <ItemContent>
+                                            <ItemTitle>
+                                                {task.content}
+                                            </ItemTitle>
+                                            {task.theme && (
+                                                <ItemDescription className="flex gap-1">
+                                                    <Badge>{task.theme}</Badge>
+                                                    {task.datetime && (
+                                                        <Badge>
+                                                            {format(
+                                                                task.datetime,
+                                                                "LLL d"
+                                                            )}
+                                                        </Badge>
+                                                    )}
+                                                </ItemDescription>
+                                            )}
+                                        </ItemContent>
+                                        <ItemActions className="flex-col">
+                                            <ActionMenu
+                                                date={
+                                                    task.datetime
+                                                        ? new Date(
+                                                              task.datetime
+                                                          )
+                                                        : undefined
+                                                }
+                                            />
+                                        </ItemActions>
+                                    </Item>
+                                </motion.li>
+                            ))}
+                        </motion.ul>
+                    </section>
+                    <div className="flex gap-1">
+                        <Input placeholder="Ask your notes" />
+                        <Button className="grow-0 self-end">
+                            <SendHorizonalIcon />
+                        </Button>
+                    </div>
+                </div>
+            ) : (
+                <div className="flex justify-center items-center h-62.5 max-h-dvh">
+                    No summary available.
+                </div>
+            ),
+        [summary.data, summary.data?.tasks]
+    );
+
+    return (
+        <main key="summary" className="max-w-md w-full mx-auto pt-5">
+            <motion.div key="content" className="flex flex-col gap-4">
+                <h1 className="text-4xl font-mono font-bold">Daily Summary</h1>
+                <QueryParamsDateSelector />
+                <AnimatePresence mode="wait">
+                    {summary.isLoading ? (
+                        <DigestSplash key="splash" />
+                    ) : (
+                        renderSummary
+                    )}
+                </AnimatePresence>
+            </motion.div>
         </main>
     );
 }

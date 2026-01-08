@@ -8,7 +8,7 @@ export function DigestSplash() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
-            className="w-full h-screen flex flex-col gap-3 justify-center items-center"
+            className="w-full h-[50dvh] flex flex-col gap-3 justify-center items-center"
         >
             <div
                 className="relative"
@@ -41,7 +41,7 @@ export function DigestSplash() {
                     <h1
                         className="text-2xl"
                     >
-                        Thinking...
+                        Summarizing...
                     </h1>
                 </motion.div>
                 <div

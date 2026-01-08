@@ -12,11 +12,15 @@ import { startOfDay } from "date-fns";
 import { useSearchParams } from "next/navigation";
 import { Notes } from "./notes";
 import { NotesForm } from "./notes-form";
+import { Button } from "@/components/ui/button";
+import { SparklesIcon } from "lucide-react";
+import Link from "next/link";
 
 export function NoteTaker() {
     const queryClient = useQueryClient();
     const searchParams = useSearchParams();
-    const currentDate = parseDate(searchParams.get("date"));
+    const searchParamsDate = searchParams.get("date");
+    const currentDate = parseDate(searchParamsDate);
     const currentDateQueryKey = ["notes", formatDate(currentDate)];
     const todayQueryKey = ["notes", formatDate(startOfDay(new Date()))];
     const session = authClient.useSession();
@@ -88,7 +92,21 @@ export function NoteTaker() {
             <NotesForm
                 addNewNote={ (text) => addNoteMutation.mutate(text) }
             />
-            <QueryParamsDateSelector />
+            <QueryParamsDateSelector
+                action={
+                    <Button
+                        asChild
+                        disabled={ !notes || !notes.length }
+                    >
+                    <Link
+                        href={`/digest?date=${searchParamsDate}`}
+                    >
+                        <SparklesIcon />
+                        Summarize
+                    </Link>
+                    </Button>
+                }
+            />
             <Notes
                 notes={ notes || [] }
                 isLoading={ isLoading }

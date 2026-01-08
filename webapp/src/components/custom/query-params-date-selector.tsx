@@ -1,16 +1,19 @@
 "use client";
 
+import { useSearchParamsDate } from "@/hooks/use-search-params-date";
 import { formatDate } from "@/lib/llm/tools";
-import { parseDate } from "@/lib/utils";
 import { addDays, isBefore, isSameDay } from "date-fns";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback } from "react";
+import { useRouter } from "next/navigation";
+import React, { useCallback } from "react";
 import { DateSelector } from "./date-selector";
 
-export function QueryParamsDateSelector() {
-    const searchParams = useSearchParams();
+type QueryParamsDateSelectorProps = {
+    action?: React.ReactNode;
+};
+
+export function QueryParamsDateSelector({ action }: QueryParamsDateSelectorProps) {
     const router = useRouter();
-    const currentDate = parseDate(searchParams.get("date"));
+    const [currentDate, _] = useSearchParamsDate();
 
     const addDaysToDate = useCallback((offset: number) => {
         const nextDate = addDays(currentDate, offset);
@@ -33,6 +36,7 @@ export function QueryParamsDateSelector() {
             currentDate={ currentDate }
             addDaysToDate={ addDaysToDate }
             selectDate={ selectDate }
+            action={ action }
         />
     );
 }

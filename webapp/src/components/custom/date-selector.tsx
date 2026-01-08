@@ -10,12 +10,14 @@ interface DateSelectorProps {
     currentDate: Date;
     addDaysToDate: (offsetInDays: number) => void;
     selectDate: (date: Date) => void;
+    action?: React.ReactNode;
 }
 
 export function DateSelector({
     currentDate,
     addDaysToDate,
     selectDate,
+    action,
 }: DateSelectorProps) {
     const now = useNow();
 
@@ -29,45 +31,50 @@ export function DateSelector({
             >
                 <ArrowLeftIcon />
             </Button>
-            <Popover>
-                <PopoverTrigger
-                    asChild
-                >
-                    <Button
-                        variant="outline"
-                    >
-                        { format(currentDate, "LLL d") }
-                    </Button>
-                </PopoverTrigger>
-                <PopoverContent
-                    className="w-auto overflow-hidden p-0"
-                >
-                    <div
-                        className="flex gap-1 p-3"
+            <div
+                className="flex gap-2"
+            >
+                <Popover>
+                    <PopoverTrigger
+                        asChild
                     >
                         <Button
-                            size="xs"
                             variant="outline"
-                            onClick={ () => selectDate(now.data) }
                         >
-                            Today
+                            { format(currentDate, "LLL d") }
                         </Button>
-                        <Button
-                            size="xs"
-                            variant="outline"
-                            onClick={ () => selectDate(subDays(now.data, 1)) }
+                    </PopoverTrigger>
+                    <PopoverContent
+                        className="w-auto overflow-hidden p-0"
+                    >
+                        <div
+                            className="flex gap-1 p-3"
                         >
-                            Yesterday
-                        </Button>
-                    </div>
-                    <Calendar
-                        mode="single"
-                        selected={ currentDate }
-                        disabled={{ after: new Date() }}
-                        onSelect={ (date) => date && selectDate(date) }
-                    />
-                </PopoverContent>
-            </Popover>
+                            <Button
+                                size="xs"
+                                variant="outline"
+                                onClick={ () => selectDate(now.data) }
+                            >
+                                Today
+                            </Button>
+                            <Button
+                                size="xs"
+                                variant="outline"
+                                onClick={ () => selectDate(subDays(now.data, 1)) }
+                            >
+                                Yesterday
+                            </Button>
+                        </div>
+                        <Calendar
+                            mode="single"
+                            selected={ currentDate }
+                            disabled={{ after: new Date() }}
+                            onSelect={ (date) => date && selectDate(date) }
+                        />
+                    </PopoverContent>
+                </Popover>
+                { action }
+            </div>
             <Button
                 variant="ghost"
                 className={ clsx(isToday(currentDate) && "invisible") }
