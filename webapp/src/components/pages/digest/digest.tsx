@@ -1,5 +1,6 @@
 "use client";
 
+import { Container } from "@/components/custom/container";
 import { QueryParamsDateSelector } from "@/components/custom/query-params-date-selector";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -144,18 +145,16 @@ export function Digest() {
     );
 
     return (
-        <main key="summary" className="max-w-md w-full mx-auto pt-5">
+        <Container>
             <motion.div key="content" className="flex flex-col gap-4">
                 <h1 className="text-4xl font-mono font-bold">Daily Summary</h1>
                 <QueryParamsDateSelector />
                 <AnimatePresence mode="wait">
                     {summary.isLoading ? (
                         <DigestSplash key="splash" />
-                    ) : (
-                        renderSummary
-                    )}
+                    ) : renderSummary}
                 </AnimatePresence>
             </motion.div>
-        </main>
+        </Container>
     );
 }

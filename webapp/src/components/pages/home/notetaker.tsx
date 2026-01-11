@@ -1,20 +1,18 @@
 "use client";
 
-import { addNote, deleteNote, editNote } from "@/app/actions/home/actions";
+import { deleteNote, editNote } from "@/app/actions/home/actions";
+import { Container } from "@/components/custom/container";
 import { QueryParamsDateSelector } from "@/components/custom/query-params-date-selector";
+import { Button } from "@/components/ui/button";
 import { fetchNotesByDate } from "@/lib/api";
-import { authClient } from "@/lib/auth-client";
 import { formatDate } from "@/lib/llm/tools";
 import { parseDate } from "@/lib/utils";
 import { Note } from "@common/types/notes";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { startOfDay } from "date-fns";
-import { useSearchParams } from "next/navigation";
-import { Notes } from "./notes";
-import { NotesForm } from "./notes-form";
-import { Button } from "@/components/ui/button";
 import { SparklesIcon } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { Notes } from "./notes";
 
 export function NoteTaker() {
     const queryClient = useQueryClient();
@@ -22,32 +20,10 @@ export function NoteTaker() {
     const searchParamsDate = searchParams.get("date");
     const currentDate = parseDate(searchParamsDate);
     const currentDateQueryKey = ["notes", formatDate(currentDate)];
-    const todayQueryKey = ["notes", formatDate(startOfDay(new Date()))];
-    const session = authClient.useSession();
 
     const { data: notes, isLoading } = useQuery({
         queryKey: currentDateQueryKey,
         queryFn: async () => fetchNotesByDate(currentDate),
-    });
-
-    const addNoteMutation = useMutation({
-        mutationFn: addNote,
-        onMutate: async (newNoteText: string) => {
-            await queryClient.cancelQueries({ queryKey: todayQueryKey });
-            const previousNotes = queryClient.getQueryData<Note[]>(todayQueryKey);
-            const newNoteTempId = Math.random().toString();
-            const newNoteTemp: Note = {
-                id: newNoteTempId,
-                key: "default",
-                message: newNoteText,
-                createdAt: new Date().toISOString(),
-            };
-            queryClient.setQueryData<Note[]>(todayQueryKey, (old) => [newNoteTemp, ...(old || [])]);
-            return { previousNotes, newNoteTempId };
-        },
-        onError: (err, newNote, context) => {
-            queryClient.setQueryData(todayQueryKey, context?.previousNotes);
-        },
     });
 
     const editNoteMutation = useMutation({
@@ -85,13 +61,14 @@ export function NoteTaker() {
     });
 
     return (
-        <main className="flex flex-col justify-center gap-5 min-w-md max-w-md mx-auto">
-            <div>
-                Welcome, { session?.data?.user.name }
-            </div>
-            <NotesForm
-                addNewNote={ (text) => addNoteMutation.mutate(text) }
-            />
+        <Container
+            className="flex flex-col gap-6"
+        >
+            <h1
+                className="text-3xl font-semibold"
+            >
+                Notes
+            </h1>
             <QueryParamsDateSelector
                 action={
                     <Button
@@ -113,6 +90,6 @@ export function NoteTaker() {
                 updateNoteOptimistically={ (id, content) => editNoteMutation.mutate({ id, content }) }
                 deleteNoteOptimistically={ (id) => deleteNoteMutation.mutate(id) }
             />
-        </main>
+        </Container>
     );
 }

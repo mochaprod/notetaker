@@ -1,7 +1,13 @@
-import { NoteTaker } from "@/components/pages/home/notetaker";
-
-export default async function Home() {
+export default function Home() {
     return (
-        <NoteTaker />
+        <div
+            className="pt-24 md:pt-36"
+        >
+            <h1
+                className="text-6xl text-center"
+            >
+                AI-Powered Notetaking
+            </h1>
+        </div>
     );
 }

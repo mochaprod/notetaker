@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Calistoga, Geist, Geist_Mono, Manrope } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
+import { Nav } from "@/components/nav/nav";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -39,7 +40,10 @@ export default function RootLayout({
             <body
                 className={`${geistSans.variable} ${geistMono.variable} ${calistoga.variable} ${manrope.variable} antialiased`}
             >
-                <Providers>{children}</Providers>
+                <Providers>
+                    <Nav />
+                    {children}
+                </Providers>
             </body>
         </html>
     );
