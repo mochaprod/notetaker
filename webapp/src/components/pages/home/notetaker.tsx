@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button";
 import { fetchNotesByDate } from "@/lib/api";
 import { formatDate } from "@/lib/llm/tools";
 import { parseDate } from "@/lib/utils";
-import { Note } from "@common/types/notes";
+import { Note } from "../../../../../packages/types/src/notes";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { SparklesIcon } from "lucide-react";
+import { SparklesIcon, WandSparklesIcon } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Notes } from "./notes";
@@ -73,13 +73,13 @@ export function NoteTaker() {
                 action={
                     <Button
                         asChild
+                        size="sm"
                         disabled={ !notes || !notes.length }
                     >
                     <Link
-                        href={`/digest?date=${searchParamsDate}`}
+                        href={`/digest?date=${formatDate(currentDate)}`}
                     >
-                        <SparklesIcon />
-                        Summarize
+                        <WandSparklesIcon />
                     </Link>
                     </Button>
                 }

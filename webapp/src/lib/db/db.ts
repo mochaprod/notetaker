@@ -1,5 +1,5 @@
-import { Note } from "@common/types/notes";
 import { Summary } from "@common/types/summary";
+import { Todo, TodoData } from "@common/types/todo";
 
 export interface NoteRepository {
     putNotes: (key: string, value: string) => Promise<Note>;
@@ -11,4 +11,11 @@ export interface NoteRepository {
 export interface DigestRepository {
     putSummary: (userId: string, startDateKey: string, endDateKey: string, summary: Omit<Summary, "id" | "startDate" | "endDate">) => Promise<Summary>;
     getSummary: (userId: string, startDateKey: string, endDateKey: string) => Promise<Summary | null>;
+}
+
+export interface TodoRepository {
+    addTodo: (userId: string, todo: Todo) => Promise<TodoData>;
+    getTodos: (userId: string) => Promise<Todo[]>;
+    updateTodo: (userId: string, todoId: string, todo: TodoData) => Promise<void>;
+    deleteTodo: (userId: string, todoId: string) => Promise<void>;
 }

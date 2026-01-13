@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "exports": {
-    "./notes": "./src/notes/index.ts",
-    "./summary": "./src/summary/index.ts"
+    "./notes": "./src/notes.ts",
+    "./summary": "./src/summary.ts",
+    "./todo": "./src/todo.ts"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

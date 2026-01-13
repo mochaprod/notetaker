@@ -1,4 +1,4 @@
-import { Note, NoteSchema } from "@common/types/notes";
+import { Note, NoteSchema } from "../../../packages/types/src/notes";
 import z from "zod";
 
 export const NotesResponseSchema = z.object({

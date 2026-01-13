@@ -2,10 +2,8 @@
 
 import { auth } from "@/lib/auth";
 import { noteRepository } from "@/lib/db/db-instance";
-import { createEmbeddingsClient } from "@/lib/embeddings/factory";
-import { LOGGER } from "@/lib/logger";
-import { createVectorDBClient } from "@/lib/vector/client";
-import { Note } from "@common/types/notes";
+import { pineconeDB } from "@/lib/vector/pinecone";
+import { Note } from "../../../../../packages/types/src/notes";
 import { headers } from "next/headers";
 
 export async function addNote(data: string): Promise<Note | null> {
@@ -17,37 +15,35 @@ export async function addNote(data: string): Promise<Note | null> {
         return null;
     }
 
-    const embeddingsClient = createEmbeddingsClient();
-    const vectorDBClient = await createVectorDBClient();
-
     const note = await noteRepository.putNotes(session.user.id, data.trim());
-    const embeddings = await embeddingsClient.generateEmbeddings(note.message);
 
-    LOGGER.info(embeddings, "Generated embeddings");
-
-    await vectorDBClient.add([{
+    await pineconeDB.upsert([{
         id: note.id,
-        embedding: embeddings,
+        text: data.trim(),
+        userId: session.user.id,
     }]);
 
     return note;
 }
 
 export async function editNote(id: string, content: string): Promise<void> {
-    const embeddingsClient = createEmbeddingsClient();
-    const vectorDBClient = await createVectorDBClient();
+    const session = await auth.api.getSession({
+        headers: await headers(),
+    });
+
+    if (!session || !content || content.trim().length === 0) {
+        return;
+    }
 
     await noteRepository.updateNotes(id, content);
-    const embeddings = await embeddingsClient.generateEmbeddings(content);
-    await vectorDBClient.upsert([{
+    await pineconeDB.upsert([{
         id,
-        embedding: embeddings,
+        text: content,
+        userId: session?.user.id,
     }]);
 }
 
 export async function deleteNote(id: string): Promise<void> {
-    const vectorDBClient = await createVectorDBClient();
-
     await noteRepository.deleteNotes(id);
-    await vectorDBClient.delete([id]);
+    await pineconeDB.delete([id]);
 }

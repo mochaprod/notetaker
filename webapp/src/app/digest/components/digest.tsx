@@ -3,8 +3,6 @@
 import { Container } from "@/components/custom/container";
 import { QueryParamsDateSelector } from "@/components/custom/query-params-date-selector";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
     Item,
     ItemActions,
@@ -16,10 +14,10 @@ import { useSearchParamsDate } from "@/hooks/use-search-params-date";
 import { Summary, SummarySchema } from "@common/types/summary";
 import { useQuery } from "@tanstack/react-query";
 import { endOfDay, format, startOfDay } from "date-fns";
-import { SendHorizonalIcon, WandSparklesIcon } from "lucide-react";
+import { WandSparklesIcon } from "lucide-react";
 import { AnimatePresence, motion, stagger } from "motion/react";
 import { useMemo } from "react";
-import { ActionMenu } from "../home/components/action-menu";
+import { ActionMenu } from "./action-menu";
 import { DigestSplash } from "./digest-splash";
 
 const containerAnimations = {
@@ -84,7 +82,7 @@ export function Digest() {
                     </motion.section>
                     <section className="flex flex-col gap-3">
                         <h2 className="text-xl font-semibold">
-                            Suggested Action Items
+                            Action Items
                         </h2>
                         <motion.ul
                             variants={containerAnimations}
@@ -115,13 +113,7 @@ export function Digest() {
                                         </ItemContent>
                                         <ItemActions className="flex-col">
                                             <ActionMenu
-                                                date={
-                                                    task.datetime
-                                                        ? new Date(
-                                                              task.datetime
-                                                          )
-                                                        : undefined
-                                                }
+                                                task={ task }
                                             />
                                         </ItemActions>
                                     </Item>
@@ -129,12 +121,6 @@ export function Digest() {
                             ))}
                         </motion.ul>
                     </section>
-                    <div className="flex gap-1">
-                        <Input placeholder="Ask your notes" />
-                        <Button className="grow-0 self-end">
-                            <SendHorizonalIcon />
-                        </Button>
-                    </div>
                 </div>
             ) : (
                 <div className="flex justify-center items-center h-62.5 max-h-dvh">

@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -13,32 +7,29 @@ datasource db {
   provider = "postgresql"
 }
 
-
 model User {
-  id            String    @id
+  id            String       @id
   name          String
-  email         String
-  emailVerified Boolean   @default(false)
+  email         String       @unique
+  emailVerified Boolean      @default(false)
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  sessions      Session[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
   accounts      Account[]
+  admin         AdminUser?
+  summaries     Digest[]
+  invites       InviteCode[]
+  notes         Note[]
+  sessions      Session[]
+  aiCredit      AICredit?
 
-  @@unique([email])
   @@map("user")
-
-  admin AdminUser?
-  notes Note[]
-  invites InviteCode[]
-
-  summaries Digest[]
 }
 
 model Session {
   id        String   @id
   expiresAt DateTime
-  token     String
+  token     String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   ipAddress String?
@@ -46,7 +37,6 @@ model Session {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([token])
   @@index([userId])
   @@map("session")
 }
@@ -56,7 +46,6 @@ model Account {
   accountId             String
   providerId            String
   userId                String
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   accessToken           String?
   refreshToken          String?
   idToken               String?
@@ -66,6 +55,7 @@ model Account {
   password              String?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@map("account")
@@ -85,111 +75,126 @@ model Verification {
 
 model AdminUser {
   userId String @id
+  user   User   @relation(fields: [userId], references: [id])
 
   @@map("admin_user")
-
-  user User @relation(fields: [userId], references: [id])
 }
 
 model InviteCode {
-  id        String   @id @default(uuid())
-  code      String   @unique
-  maxUses   Int      @default(1)
-  uses      Int      @default(0)
+  id        String    @id @default(uuid())
+  code      String    @unique
+  maxUses   Int       @default(1)
+  uses      Int       @default(0)
   expiresAt DateTime?
   inviterId String?
-  inviter   User?    @relation(fields: [inviterId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  inviter   User?     @relation(fields: [inviterId], references: [id])
 
   @@index([inviterId])
   @@map("invite_code")
 }
 
 model Note {
-  id String @id @default(uuid()) @db.Uuid
-  message String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-  userId String
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  digestItems DigestItem[]
-  digestThemes DigestTheme[]
+  message           String
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @default(now())
+  userId            String
+  id                String             @id @default(uuid()) @db.Uuid
   digestCorrections DigestCorrection[]
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  digestItems       DigestItem[]       @relation("DigestItemToNote")
+  digestThemes  DigestTheme[]  @relation("DigestThemeToNote")
 
   @@map("note")
 }
 
 model Digest {
-  id String @id @default(uuid()) @db.Uuid
-  userId String
-  startDate String
-  endDate String
-
-  summary String
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  items DigestItem[]
-  themes DigestTheme[]
-  corrections DigestCorrection[]
+  userId            String
+  startDate         String
+  endDate           String
+  summary           String
+  id                String                   @id @default(uuid()) @db.Uuid
+  user              User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  corrections       DigestCorrection[]
   followUpQuestions DigestFollowUpQuestion[]
+  items             DigestItem[]
+  dirty             Boolean @default(false)
+  themes    DigestTheme[]
 
-  @@map("digest")
   @@index([userId])
   @@index([userId, startDate, endDate])
+  @@map("digest")
 }
 
 model DigestItem {
-  id String @id @default(uuid()) @db.Uuid
-  digestId String @db.Uuid
+  content   String
+  category  String?
+  datetime  DateTime?
+  important Boolean   @default(false)
+  id        String    @id @default(uuid()) @db.Uuid
+  digestId  String    @db.Uuid
+  digest    Digest    @relation(fields: [digestId], references: [id], onDelete: Cascade)
+  notes     Note[]    @relation("DigestItemToNote")
 
-  content String
-  category String?
-  datetime DateTime?
-  important Boolean @default(false)
-
-  digest Digest @relation(fields: [digestId], references: [id], onDelete: Cascade)
-  notes      Note[]
-
-  @@map("digest_item")
   @@index([digestId])
+  @@map("digest_item")
 }
 
 model DigestTheme {
-  id String @id @default(uuid()) @db.Uuid
-  digestId String @db.Uuid
-  name String
+  id          String @id @default(uuid()) @db.Uuid
+  digestItemId    String @db.Uuid
+  name        String
   description String
+  digest Digest @relation(fields: [digestItemId], references: [id], onDelete: Cascade)
+  notes       Note[] @relation("DigestThemeToNote")
 
-  digest Digest @relation(fields: [digestId], references: [id], onDelete: Cascade)
-  notes Note[]
-
+  @@index([digestItemId])
   @@map("digest_theme")
-  @@index([digestId])
 }
 
 model DigestCorrection {
-  id String @id @default(uuid()) @db.Uuid
-  digestId String @db.Uuid
-  noteId String @db.Uuid
+  id          String  @id @default(uuid()) @db.Uuid
+  noteId      String  @db.Uuid
   explanation String
-  confidence Decimal
-
-  note Note @relation(fields: [noteId], references: [id], onDelete: Cascade)
-  digest Digest @relation(fields: [digestId], references: [id], onDelete: Cascade)
+  confidence  Decimal
+  digestId    String  @db.Uuid
+  digest      Digest  @relation(fields: [digestId], references: [id], onDelete: Cascade)
+  note        Note    @relation(fields: [noteId], references: [id], onDelete: Cascade)
 
   @@map("digest_correction")
 }
 
 model DigestFollowUpQuestion {
-  id String @id @default(uuid()) @db.Uuid
-  digestId String @db.Uuid
-
+  id       String  @id @default(uuid()) @db.Uuid
+  digestId String  @db.Uuid
   question String
-  answer String?
-
-  digest Digest @relation(fields: [digestId], references: [id], onDelete: Cascade)
+  answer   String?
+  digest   Digest  @relation(fields: [digestId], references: [id], onDelete: Cascade)
 
   @@map("digest_follow_up_question")
+}
+
+model Todo {
+  id String @id @default(uuid()) @db.Uuid
+  userId String
+  content String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  done Boolean
+  dateTime DateTime?
+  important Boolean @default(false)
+
+  @@map("todo")
+}
+
+model AICredit {
+  userId String @id
+  credits Int
+  updatedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("ai_credit")
 }

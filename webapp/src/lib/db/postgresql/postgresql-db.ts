@@ -1,6 +1,6 @@
 import { PrismaClient } from "@db/prisma/generated/prisma/client";
 import { NoteRepository } from "../db";
-import { Note } from "@common/types/notes";
+import { Note } from "../../../../../packages/types/src/notes";
 
 export class PostgresqlNoteRepository implements NoteRepository {
     constructor(private readonly prisma: PrismaClient) {

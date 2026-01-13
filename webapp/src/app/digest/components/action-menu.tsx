@@ -2,13 +2,32 @@
 
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { CalendarPlusIcon, CircleAlertIcon, PlusIcon, Trash2Icon } from "lucide-react";
+import { Task } from "@common/types/summary";
+import clsx from "clsx";
+import { CalendarPlusIcon, CheckIcon, PlusIcon, Trash2Icon } from "lucide-react";
+import { useCallback, useState } from "react";
+import { addTodo } from "../actions/add-todo";
 
 export type ActionMenuProps = {
-    date?: Date;
+    task: Task;
 };
 
-export function ActionMenu({ date }: ActionMenuProps) {
+export function ActionMenu({ task }: ActionMenuProps) {
+    const [isGreen, setGreen] = useState(false);
+
+    const date = task.datetime;
+
+    const handleAddToList = useCallback(async () => {
+        await addTodo({
+            content: task.content,
+            done: false,
+            datetime: date,
+            important: false,
+        });
+
+        setGreen(true);
+    }, []);
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger
@@ -23,9 +42,20 @@ export function ActionMenu({ date }: ActionMenuProps) {
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-                <DropdownMenuItem>
-                    <CircleAlertIcon />
-                    Mark as important
+                <DropdownMenuItem
+                    className={ clsx(isGreen && "text-green-500") }
+                    onClick={ handleAddToList }
+                >
+                    { isGreen
+                        ? (
+                            <CheckIcon
+                                className="text-green-500"
+                            />
+                        )
+                        : (
+                            <PlusIcon />
+                        ) }
+                    { isGreen ? "Added to list" : "Add to list" }
                 </DropdownMenuItem>
                 { date && (
                     <DropdownMenuItem>

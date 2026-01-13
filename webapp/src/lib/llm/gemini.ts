@@ -1,4 +1,4 @@
-import { Note } from "@common/types/notes";
+import { Note } from "../../../../packages/types/src/notes";
 import { Content, GoogleGenAI } from "@google/genai";
 import fs from "fs";
 import mustache from "mustache";

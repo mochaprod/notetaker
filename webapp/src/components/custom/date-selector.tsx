@@ -23,16 +23,25 @@ export function DateSelector({
 
     return (
         <div
-            className="flex justify-between w-full"
+            className="flex justify-end gap-1 w-full"
         >
             <Button
-                variant="ghost"
+                variant="outline"
+                size="sm"
                 onClick={ () => addDaysToDate(-1) }
             >
                 <ArrowLeftIcon />
             </Button>
+            <Button
+                variant="outline"
+                size="sm"
+                className={ clsx(isToday(currentDate) && "invisible") }
+                onClick={ () => addDaysToDate(1) }
+            >
+                <ArrowRightIcon />
+            </Button>
             <div
-                className="flex gap-2"
+                className="flex gap-1"
             >
                 <Popover>
                     <PopoverTrigger
@@ -40,6 +49,7 @@ export function DateSelector({
                     >
                         <Button
                             variant="outline"
+                            size="sm"
                         >
                             { format(currentDate, "LLL d") }
                         </Button>
@@ -75,13 +85,6 @@ export function DateSelector({
                 </Popover>
                 { action }
             </div>
-            <Button
-                variant="ghost"
-                className={ clsx(isToday(currentDate) && "invisible") }
-                onClick={ () => addDaysToDate(1) }
-            >
-                <ArrowRightIcon />
-            </Button>
         </div>
     );
 }

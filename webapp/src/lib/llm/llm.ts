@@ -1,4 +1,4 @@
-import { Note } from "@common/types/notes";
+import { Note } from "../../../../packages/types/src/notes";
 import { SummarySchema, TaskSchema } from "@common/types/summary";
 import z from "zod";
 
