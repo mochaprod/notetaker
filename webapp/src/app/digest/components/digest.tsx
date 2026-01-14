@@ -133,7 +133,6 @@ export function Digest() {
     return (
         <Container>
             <motion.div key="content" className="flex flex-col gap-4">
-                <h1 className="text-4xl font-mono font-bold">Daily Summary</h1>
                 <QueryParamsDateSelector />
                 <AnimatePresence mode="wait">
                     {summary.isLoading ? (

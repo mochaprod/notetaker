@@ -9,7 +9,7 @@ import { CheckIcon, MoreHorizontalIcon, PenIcon, TrashIcon, XIcon } from "lucide
 import { useState } from "react";
 import { formatRelativeTime } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { Note } from "../../../../../packages/types/src/notes";
+import { Note } from "@common/types/notes";
 import { useNow } from "@/hooks/use-now";
 
 export interface NotesProps {

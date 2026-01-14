@@ -1,12 +1,12 @@
 "use client";
 
 import { Container } from "@/components/custom/container";
-import { NotesForm } from "@/components/pages/home/notes-form";
+import { NotesForm } from "@/app/write/components/notes-form";
 import { formatDate } from "@/lib/llm/tools";
-import { Note } from "../../../../packages/types/src/notes";
+import { Note } from "@common/types/notes";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { startOfDay } from "date-fns";
-import { addNote } from "../actions/home/actions";
+import { addNote } from "../../actions/home/actions";
 
 export function Write() {
     const queryClient = useQueryClient();

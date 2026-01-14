@@ -29,7 +29,7 @@ export function NotesForm({ addNewNote }: NotesFormProps) {
                 <Textarea
                     name="message"
                     placeholder="What's on your mind?"
-                    className="md:text-xl leading-relaxed min-h-68"
+                    className="text-2xl leading-relaxed min-h-68"
                 />
                 <Button
                     type="submit"

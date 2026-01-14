@@ -7,12 +7,12 @@ import { Button } from "@/components/ui/button";
 import { fetchNotesByDate } from "@/lib/api";
 import { formatDate } from "@/lib/llm/tools";
 import { parseDate } from "@/lib/utils";
-import { Note } from "../../../../../packages/types/src/notes";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { SparklesIcon, WandSparklesIcon } from "lucide-react";
+import { WandSparklesIcon } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Notes } from "./notes";
+import { Note } from "@common/types/notes";
+import { Notes } from "../../notes/components/notes";
 
 export function NoteTaker() {
     const queryClient = useQueryClient();
@@ -64,23 +64,18 @@ export function NoteTaker() {
         <Container
             className="flex flex-col gap-6"
         >
-            <h1
-                className="text-3xl font-semibold"
-            >
-                Notes
-            </h1>
             <QueryParamsDateSelector
                 action={
                     <Button
                         asChild
-                        size="sm"
+                        size="icon"
                         disabled={ !notes || !notes.length }
                     >
-                    <Link
-                        href={`/digest?date=${formatDate(currentDate)}`}
-                    >
-                        <WandSparklesIcon />
-                    </Link>
+                        <Link
+                            href={`/digest?date=${formatDate(currentDate)}`}
+                        >
+                            <WandSparklesIcon />
+                        </Link>
                     </Button>
                 }
             />
