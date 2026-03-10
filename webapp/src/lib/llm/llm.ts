@@ -17,4 +17,5 @@ export type LLMSummary = z.infer<typeof LLMSummarySchema>;
 
 export interface LLM {
     summarize(notes: Note[]): Promise<LLMSummary>;
+    call<R>(prompt: string, responseSchema: z.ZodSchema<R>, model: string): Promise<R>;
 }

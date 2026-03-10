@@ -22,7 +22,7 @@ export function Write() {
                 id: newNoteTempId,
                 key: "default",
                 message: newNoteText,
-                createdAt: new Date().toISOString(),
+                createdAt: new Date(),
             };
             queryClient.setQueryData<Note[]>(todayQueryKey, (old) => [newNoteTemp, ...(old || [])]);
             return { previousNotes, newNoteTempId };
@@ -33,7 +33,14 @@ export function Write() {
     });
 
     return (
-        <Container>
+        <Container
+            className="flex gap-6"
+        >
+            <h1
+                className="text-3xl font-bold"
+            >
+                Write
+            </h1>
             <NotesForm
                 addNewNote={ (text) => addNoteMutation.mutate(text) }
             />

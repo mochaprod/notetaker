@@ -3,7 +3,7 @@
 import { auth } from "@/lib/auth";
 import { noteRepository } from "@/lib/db/db-instance";
 import { pineconeDB } from "@/lib/vector/pinecone";
-import { Note } from "../../../../../packages/types/src/notes";
+import { Note } from "@common/types/notes";
 import { headers } from "next/headers";
 
 export async function addNote(data: string): Promise<Note | null> {
@@ -21,6 +21,7 @@ export async function addNote(data: string): Promise<Note | null> {
         id: note.id,
         text: data.trim(),
         userId: session.user.id,
+        updatedAt: note.createdAt,
     }]);
 
     return note;
@@ -40,6 +41,7 @@ export async function editNote(id: string, content: string): Promise<void> {
         id,
         text: content,
         userId: session?.user.id,
+        updatedAt: new Date(),
     }]);
 }
 

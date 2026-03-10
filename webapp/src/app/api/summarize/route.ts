@@ -1,9 +1,10 @@
 import { auth } from "@/lib/auth";
-import { digestRepository, noteRepository } from "@/lib/db/db-instance";
+import { digestRepository, noteRepository, userRepository } from "@/lib/db/db-instance";
 import { Gemini } from "@/lib/llm/gemini";
 import { formatDate } from "@/lib/llm/tools";
 import { LOGGER } from "@/lib/logger";
-import { isSameDay } from "date-fns";
+import { AICreditError } from "@common/types/user";
+import { differenceInMinutes, isSameDay } from "date-fns";
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import z from "zod";
@@ -13,6 +14,24 @@ const startEndDateSchema = z.object({
     end: z.coerce.date(),
 });
 const llm = new Gemini();
+
+const DAILY_CREDITS = 10;
+
+async function validateAvailableCredits(userId: string) {
+    const credits = await userRepository.getAICredits(userId);
+
+    if (!credits) {
+        await userRepository.upsertAICredits(userId, DAILY_CREDITS - 1);
+    } else {
+        if (differenceInMinutes(new Date(), credits.updatedAt) > 1440) {
+            await userRepository.upsertAICredits(userId, DAILY_CREDITS - 1, true);
+        } else if (credits.credits <= 0) {
+            throw new AICreditError("No credits available");
+        } else {
+            await userRepository.upsertAICredits(userId, credits.credits - 1);
+        }
+    }
+}
 
 export async function GET(request: NextRequest) {
     const session = await auth.api.getSession({
@@ -30,6 +49,7 @@ export async function GET(request: NextRequest) {
 
     const startDateStr = request.nextUrl.searchParams.get("start");
     const endDateStr = request.nextUrl.searchParams.get("end");
+    const forceStr = request.nextUrl.searchParams.get("force");
     const params = startEndDateSchema.safeParse({
         start: startDateStr,
         end: endDateStr,
@@ -52,12 +72,7 @@ export async function GET(request: NextRequest) {
     const { start: startDate, end: endDate } = params.data;
     const startDateKey = formatDate(startDate);
     const endDateKey = formatDate(endDate);
-
-    const existingSummary = await digestRepository.getSummary(
-        userId,
-        startDateKey,
-        endDateKey,
-    );
+    const force = forceStr === "true";
 
     const DATE_LOGGER = LOGGER.child({
         userId,
@@ -65,9 +80,36 @@ export async function GET(request: NextRequest) {
         endDate: params.data.end,
     });
 
-    if (existingSummary) {
-        DATE_LOGGER.debug("Existing summary available.");
-        return NextResponse.json(existingSummary);
+    if (!force) {
+        const existingSummary = await digestRepository.getSummary(
+            userId,
+            startDateKey,
+            endDateKey,
+        );
+
+        if (existingSummary) {
+            DATE_LOGGER.debug("Existing summary available.");
+            return NextResponse.json(existingSummary);
+        }
+    } else {
+        DATE_LOGGER.debug("Forcing summarization");
+    }
+
+    try {
+        await validateAvailableCredits(userId);
+    } catch (error) {
+        if (error instanceof AICreditError) {
+            return NextResponse.json(
+                {
+                    error: "No more AI credits available",
+                },
+                {
+                    status: 402,
+                },
+            );
+        }
+
+        throw error;
     }
 
     try {

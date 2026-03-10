@@ -44,11 +44,6 @@ export function DigestSplash() {
                         Summarizing...
                     </h1>
                 </motion.div>
-                <div
-                    className="text-muted-foreground text-sm"
-                >
-                    We're summarizing your day...
-                </div>
             </div>
         </motion.div>
     );

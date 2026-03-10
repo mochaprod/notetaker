@@ -64,12 +64,18 @@ export function NoteTaker() {
         <Container
             className="flex flex-col gap-6"
         >
+            <h1
+                className="text-3xl font-bold"
+            >
+                Notes
+            </h1>
             <QueryParamsDateSelector
                 action={
                     <Button
-                        asChild
                         size="icon"
-                        disabled={ !notes || !notes.length }
+                        disabled={ !notes?.length }
+                        asChild={ !!notes?.length }
+                        title="Summarize"
                     >
                         <Link
                             href={`/digest?date=${formatDate(currentDate)}`}

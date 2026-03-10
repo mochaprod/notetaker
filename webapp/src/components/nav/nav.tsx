@@ -55,7 +55,7 @@ export function Nav() {
             as="div"
         >
             <NavigationMenu
-                className="z-50 pt-2 pb-2 w-auto sm:mt-5 sm:mb-5 bottom-0 sm:relative sm:bottom-auto max-w-md rounded-lg"
+                className="z-50 w-auto sm:my-3 bottom-0 sm:relative sm:bottom-auto max-w-md rounded-lg"
             >
                 <NavigationMenuList
                     className="w-full gap-3 sm:gap-2"

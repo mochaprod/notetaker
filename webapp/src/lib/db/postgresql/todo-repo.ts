@@ -87,6 +87,18 @@ export class PostgresqlTodoRepository implements TodoRepository {
         });
     }
 
+    async setTodoStatus(userId: string, todoId: string, done: boolean): Promise<void> {
+        await this.prisma.todo.update({
+            where: {
+                id: todoId,
+                userId,
+            },
+            data: {
+                done,
+            },
+        });
+    }
+
     async deleteTodo(userId: string, todoId: string) {
         await this.prisma.todo.delete({
             where: {

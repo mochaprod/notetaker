@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "exports": {
+    "./user": "./src/user.ts",
     "./notes": "./src/notes.ts",
     "./summary": "./src/summary.ts",
     "./todo": "./src/todo.ts"

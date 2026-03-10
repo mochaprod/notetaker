@@ -35,7 +35,7 @@ export class Gemini implements LLM {
         });
 
         const response = await this.genai.models.generateContent({
-            model: "gemini-2.5-flash",
+            model: "gemini-2.5-flash-lite",
             contents: jsonSummaryPrompt,
             config: {
                 responseMimeType: "application/json",
@@ -130,5 +130,31 @@ export class Gemini implements LLM {
         }
 
         throw new Error("Max LLM calls reached for this summary.");
+    }
+
+    async call<R>(prompt: string, responseSchema: z.ZodSchema<R>, model: string): Promise<R> {
+        const response = await this.genai.models.generateContent({
+            model,
+            contents: [
+                {
+                    role: "user",
+                    parts: [
+                        {
+                            text: prompt,
+                        },
+                    ],
+                },
+            ],
+            config: {
+                responseMimeType: "application/json",
+                responseJsonSchema: z.toJSONSchema(responseSchema),
+            },
+        });
+
+        if (!response.text) {
+            throw new Error("No response from LLM");
+        }
+
+        return responseSchema.parse(JSON.parse(response.text));
     }
 }

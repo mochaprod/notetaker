@@ -13,6 +13,7 @@ export const PineconeRecordSchema = z.object({
     id: z.string(),
     text: z.string(),
     userId: z.string(),
+    updatedAt: z.coerce.date(),
 });
 
 export type PineconeRecord = z.infer<typeof PineconeRecordSchema>;
@@ -33,12 +34,15 @@ export class PineconeVectorDBClient {
         const index = this.getIndex();
         LOGGER.info("Inserting to pinecone!");
         await index.upsertRecords(records.map(({
-            id, text, userId,
-        }) => ({
-            "_id": id,
-            text,
-            "user_id": userId,
-        })));
+            id, text, userId, updatedAt,
+        }) => {
+            return {
+                "_id": id,
+                text,
+                "user_id": userId,
+                "updated_at": Math.floor(updatedAt.getTime() / 1000),
+            };
+        }));
     }
 
     async delete(ids: string[]) {

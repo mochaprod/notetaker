@@ -106,6 +106,7 @@ model Note {
   digestItems       DigestItem[]       @relation("DigestItemToNote")
   digestThemes  DigestTheme[]  @relation("DigestThemeToNote")
 
+  @@index([createdAt, id])
   @@map("note")
 }
 

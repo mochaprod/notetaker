@@ -14,11 +14,12 @@ import { useSearchParamsDate } from "@/hooks/use-search-params-date";
 import { Summary, SummarySchema } from "@common/types/summary";
 import { useQuery } from "@tanstack/react-query";
 import { endOfDay, format, startOfDay } from "date-fns";
-import { WandSparklesIcon } from "lucide-react";
+import { RefreshCwIcon, WandSparklesIcon } from "lucide-react";
 import { AnimatePresence, motion, stagger } from "motion/react";
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import { ActionMenu } from "./action-menu";
 import { DigestSplash } from "./digest-splash";
+import { Button } from "@/components/ui/button";
 
 const containerAnimations = {
     hidden: {
@@ -48,11 +49,16 @@ export function Digest() {
     const [currentDate, currentDateStr] = useSearchParamsDate();
     const summary = useQuery<Summary>({
         queryKey: ["summary", currentDateStr],
-        queryFn: async () => {
+        queryFn: async ({ client, queryKey }) => {
+            const state = client.getQueryState(queryKey);
+            const isInitialFetch = state?.dataUpdateCount === 0;
+
             const params = new URLSearchParams({
                 start: startOfDay(currentDate).toISOString(),
                 end: endOfDay(currentDate).toISOString(),
+                force: isInitialFetch ? "false" : "true",
             });
+
             const response = await fetch(`/api/summarize?${params.toString()}`);
             const data = await response.json();
 
@@ -130,12 +136,32 @@ export function Digest() {
         [summary.data, summary.data?.tasks]
     );
 
+    const resummarizeButton = (
+        <Button
+            size="icon"
+            title="Resummarize"
+            disabled={ summary.isFetching }
+            onClick={ () => summary.refetch() }
+        >
+            <RefreshCwIcon />
+        </Button>
+    );
+
     return (
-        <Container>
+        <Container
+            className="flex gap-6"
+        >
+            <h1
+                className="text-3xl font-bold"
+            >
+                Tasks
+            </h1>
             <motion.div key="content" className="flex flex-col gap-4">
-                <QueryParamsDateSelector />
+                <QueryParamsDateSelector
+                    action={ resummarizeButton }
+                />
                 <AnimatePresence mode="wait">
-                    {summary.isLoading ? (
+                    {summary.isFetching ? (
                         <DigestSplash key="splash" />
                     ) : renderSummary}
                 </AnimatePresence>

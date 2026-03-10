@@ -8,7 +8,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { CheckIcon, MoreHorizontalIcon, PenIcon, TrashIcon, XIcon } from "lucide-react";
 import { useState } from "react";
 import { formatRelativeTime } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
 import { Note } from "@common/types/notes";
 import { useNow } from "@/hooks/use-now";
 
