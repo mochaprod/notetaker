@@ -41,7 +41,7 @@ export function DigestSplash() {
                     <h1
                         className="text-2xl"
                     >
-                        Summarizing...
+                        Loading...
                     </h1>
                 </motion.div>
             </div>

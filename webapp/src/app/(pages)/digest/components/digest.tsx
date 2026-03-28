@@ -154,7 +154,7 @@ export function Digest() {
             <h1
                 className="text-3xl font-bold"
             >
-                Tasks
+                Digest
             </h1>
             <motion.div key="content" className="flex flex-col gap-4">
                 <QueryParamsDateSelector

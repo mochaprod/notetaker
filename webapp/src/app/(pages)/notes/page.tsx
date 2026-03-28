@@ -1,4 +1,4 @@
-import { NoteTaker } from "../write/components/notetaker";
+import { NoteTaker } from "./components/notetaker";
 
 export default function NotesPage() {
     return (

@@ -1,21 +1,19 @@
 "use client";
 
 import { useIsMobile } from "@/hooks/use-mobile";
-import { HamburgerIcon, ListCheckIcon, NotebookTextIcon, PenIcon, SparklesIcon } from "lucide-react";
+import { ListCheckIcon, NotebookTextIcon, PenIcon, SparklesIcon } from "lucide-react";
 import Link from "next/link";
-import { Button } from "../ui/button";
+import { usePathname } from "next/navigation";
+import { Container } from "../custom/container";
 import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from "../ui/navigation-menu";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { NavItem } from "./common";
 import { MobileNav } from "./mobile-nav";
-import { Container } from "../custom/container";
-import { usePathname } from "next/navigation";
 
 export type NavProps = {
     items: NavItem[];
 };
 
-const navItems: NavItem[] = [
+export const navItems: NavItem[] = [
     {
         title: "Write",
         href: "/write",

@@ -12,7 +12,7 @@ import { WandSparklesIcon } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Note } from "@common/types/notes";
-import { Notes } from "../../notes/components/notes";
+import { Notes } from "./notes";
 
 export function NoteTaker() {
     const queryClient = useQueryClient();

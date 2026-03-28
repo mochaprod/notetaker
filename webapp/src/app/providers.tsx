@@ -2,7 +2,7 @@
 
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import React, { PropsWithChildren, useRef } from "react";
+import { PropsWithChildren, useRef } from "react";
 
 export function Providers({ children }: PropsWithChildren) {
     const queryClientRef = useRef(new QueryClient());
