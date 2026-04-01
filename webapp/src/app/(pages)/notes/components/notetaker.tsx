@@ -13,6 +13,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Note } from "@common/types/notes";
 import { Notes } from "./notes";
+import { useSidebar } from "@/components/ui/sidebar";
 
 export function NoteTaker() {
     const queryClient = useQueryClient();
@@ -59,6 +60,7 @@ export function NoteTaker() {
             queryClient.invalidateQueries({ queryKey: currentDateQueryKey });
         },
     });
+    const { toggleSidebar } = useSidebar();
 
     return (
         <Container
@@ -91,6 +93,11 @@ export function NoteTaker() {
                 updateNoteOptimistically={ (id, content) => editNoteMutation.mutate({ id, content }) }
                 deleteNoteOptimistically={ (id) => deleteNoteMutation.mutate(id) }
             />
+            <Button
+                onClick={ toggleSidebar }
+            >
+                Toggle
+            </Button>
         </Container>
     );
 }

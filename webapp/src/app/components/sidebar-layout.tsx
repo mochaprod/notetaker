@@ -1,12 +1,12 @@
-"use client";
-
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "./app-sidebar";
 import { PropsWithChildren } from "react";
+import { AppSidebar } from "./app-sidebar";
 
-export function SidebarLayout({ children }: PropsWithChildren) {
+export async function SidebarLayout({ children }: PropsWithChildren) {
     return (
-        <SidebarProvider>
+        <SidebarProvider
+            defaultOpen={ false }
+        >
             <AppSidebar />
             { children }
         </SidebarProvider>

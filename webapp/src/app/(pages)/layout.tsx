@@ -1,12 +1,10 @@
-import { SidebarProvider } from "@/components/ui/sidebar";
 import { PropsWithChildren } from "react";
-import { AppSidebar } from "../components/app-sidebar";
+import { SidebarLayout } from "../components/sidebar-layout";
 
 export default function PagesLayout({ children }: PropsWithChildren) {
     return (
-        <SidebarProvider>
-            <AppSidebar />
+        <SidebarLayout>
             { children }
-        </SidebarProvider>
+        </SidebarLayout>
     );
 }

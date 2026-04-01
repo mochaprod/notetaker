@@ -1,40 +1,44 @@
 "use client";
 
 import { navItems } from "@/components/nav/nav";
-import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
+import {
+    Sidebar,
+    SidebarContent,
+    SidebarFooter,
+    SidebarGroup,
+    SidebarGroupContent,
+    SidebarHeader,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
+} from "@/components/ui/sidebar";
 import Link from "next/link";
+import { UserDropdown } from "./user-dropdown";
 
 export function AppSidebar() {
     return (
-        <Sidebar>
-            <SidebarHeader />
+        <Sidebar collapsible="icon">
+            <SidebarHeader>
+                <SidebarMenu>
+                    <UserDropdown />
+                </SidebarMenu>
+            </SidebarHeader>
             <SidebarContent>
                 <SidebarGroup>
                     <SidebarGroupContent>
-                        <SidebarMenu
-                            className="gap-3"
-                        >
-                            { navItems.map(({ title, href, icon }) => (
-                                <SidebarMenuItem
-                                    key={ title }
-                                >
-                                    <SidebarMenuButton
-                                        asChild
-                                    >
-                                        <Link
-                                            href={ href }
-                                            className="h-9"
-                                        >
-                                            { icon }
-                                            <span
-                                                className="text-lg"
-                                            >
-                                                { title }
+                        <SidebarMenu className="gap-3">
+                            {navItems.map(({ title, href, icon }) => (
+                                <SidebarMenuItem key={title}>
+                                    <SidebarMenuButton asChild>
+                                        <Link href={href} className="h-9">
+                                            {icon}
+                                            <span className="text-lg">
+                                                {title}
                                             </span>
                                         </Link>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
-                            )) }
+                            ))}
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
