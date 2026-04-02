@@ -57,8 +57,9 @@ From `webapp/`:
 - `pnpm dev` (Next.js dev server with Turbopack)
 - `pnpm build`
 - `pnpm start`
+From project root:
+- `pnpm --filter webapp run dev`
 
-## Notable Gaps
-- Tests are not implemented (root and packages only include placeholder scripts).
-- `packages/llm` and `vector-db` are currently empty.
-- `use-notes.ts` hook is empty.
+## Conventions
+- Pure CSS is absolutely not allowed. Use Tailwind 99.99% of the time.
+- No tabs, uses spaces. Indents should be 4 spaces.

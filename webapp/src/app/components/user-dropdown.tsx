@@ -5,12 +5,18 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem,
 import { SidebarMenuButton } from "@/components/ui/sidebar";
 import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
+import { toast } from "sonner";
 
 export function UserDropdown() {
     const session = authClient.useSession();
 
     const isSessionPending = !session || session.isPending || session.isRefetching;
     const isLoggedIn = !!session.data;
+
+    const signOut = async () => {
+        await authClient.signOut();
+        toast.success("Signed out successfully.", { position: "top-right" });
+    };
 
     const renderDropdownContent = () => {
         if (!isSessionPending) {
@@ -21,7 +27,7 @@ export function UserDropdown() {
                     </DropdownMenuLabel>
                     <DropdownMenuItem>Profile</DropdownMenuItem>
                     <DropdownMenuItem
-                        onClick={ () => authClient.signOut() }
+                        onClick={ signOut }
                     >
                         Sign Out
                     </DropdownMenuItem>

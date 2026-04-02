@@ -20,10 +20,11 @@ import { Input } from "@/components/ui/input";
 import { AuthClientEmailSignInData } from "@/lib/auth-client";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import z from "zod";
+import z from "zod/v4";
 import { useCallback } from "react";
 import { TriangleAlert } from "lucide-react";
 import Link from "next/link";
+import { Spinner } from "../../../../components/ui/spinner";
 
 export type LoginFormProps = React.ComponentProps<"div"> & {
     signIn: (data: AuthClientEmailSignInData) => Promise<void>;
@@ -39,7 +40,7 @@ const SignInFormSchema = z.object({
 
 type SignInFormShape = z.infer<typeof SignInFormSchema>;
 
-export function LoginForm({
+export function SignInForm({
     signIn,
     isSuccess,
     isLoading,
@@ -47,7 +48,7 @@ export function LoginForm({
     className,
     ...props
 }: LoginFormProps) {
-    const form = useForm<SignInFormShape>({
+    const form = useForm({
         resolver: zodResolver(SignInFormSchema),
         defaultValues: {
             email: "",
@@ -66,13 +67,12 @@ export function LoginForm({
     );
 
     return (
-        <div className={cn("flex flex-col gap-6", className)} {...props}>
-            <Card>
-                <CardHeader className="text-center">
-                    <CardTitle className="text-xl">Welcome back!</CardTitle>
-                    <CardDescription>
-                        <div>Login with your email</div>
-                    </CardDescription>
+        <div className={cn("flex flex-col gap-5 pt-20", className)} {...props}>
+            <Card
+                className="gap-5 py-8"
+            >
+                <CardHeader>
+                    <CardTitle className="text-xl">Sign in to your account</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={form.handleSubmit(onSignUpFormSubmit)}>
@@ -87,7 +87,6 @@ export function LoginForm({
                                         </FieldLabel>
                                         <Input
                                             type="email"
-                                            placeholder="m@example.com"
                                             aria-invalid={fieldState.invalid}
                                             {...field}
                                         />
@@ -125,8 +124,10 @@ export function LoginForm({
                                 </div>
                             )}
                             <Field>
-                                <Button disabled={isLoading} type="submit">
-                                    Login
+                                <Button disabled={!form.formState.isValid || isLoading} type="submit" size="lg">
+                                    {isLoading
+                                        ? (<Spinner className="size-6" />)
+                                        : "Sign in"}
                                 </Button>
                                 <FieldDescription className="text-center">
                                     Don&apos;t have an account?{" "}
