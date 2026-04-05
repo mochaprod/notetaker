@@ -9,7 +9,7 @@ export function withAuth<P extends object>(
     Component: ServerComponent<P>,
     redirectTo = "/",
 ) {
-    return async function ProtectedComponent(props: P) {
+    async function ProtectedComponent(props: P) {
         const session = await auth.api.getSession({
             headers: await headers(),
         });
@@ -20,4 +20,7 @@ export function withAuth<P extends object>(
 
         return Component(props);
     };
+    ProtectedComponent.displayName = `withAuth(${Component.name})`;
+
+    return ProtectedComponent;
 }

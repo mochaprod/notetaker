@@ -9,11 +9,7 @@ export function Providers({ children }: PropsWithChildren) {
     const queryClientRef = useRef(new QueryClient());
 
     return (
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem={false}
-        >
+        <ThemeProvider>
             <QueryClientProvider
                 client={ queryClientRef.current }
             >
