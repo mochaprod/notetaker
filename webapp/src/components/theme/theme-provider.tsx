@@ -1,13 +1,16 @@
 "use client";
 
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { ThemeProvider as NextThemeProvider, useTheme as useNextTheme } from "next-themes";
 
-export type Theme = "light" | "dark";
+export type Theme = "light" | "dark" | "system";
 
 const THEME_STORAGE_KEY = "drift-theme";
 
 const isTheme = (value: string | undefined): value is Theme =>
+    value === "light" || value === "dark" || value === "system";
+
+const isResolvedTheme = (value: string | undefined): value is Exclude<Theme, "system"> =>
     value === "light" || value === "dark";
 
 export function ThemeProvider({
@@ -17,8 +20,8 @@ export function ThemeProvider({
     return (
         <NextThemeProvider
             attribute="class"
-            defaultTheme="dark"
-            enableSystem={false}
+            defaultTheme="system"
+            enableSystem
             storageKey={THEME_STORAGE_KEY}
             { ...props }
         >
@@ -34,20 +37,22 @@ export function useTheme() {
         setTheme: setNextTheme,
         ...rest
     } = useNextTheme();
+    const [mounted, setMounted] = useState(false);
 
-    const activeTheme = isTheme(theme)
-        ? theme
-        : isTheme(resolvedTheme)
-          ? resolvedTheme
-          : "light";
+    const selectedTheme = isTheme(theme) ? theme : "system";
+    const activeTheme = isResolvedTheme(resolvedTheme) ? resolvedTheme : "light";
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     useEffect(() => {
         if (typeof window === "undefined") {
             return;
         }
 
-        window.localStorage.setItem(THEME_STORAGE_KEY, activeTheme);
-    }, [activeTheme]);
+        window.localStorage.setItem(THEME_STORAGE_KEY, selectedTheme);
+    }, [selectedTheme]);
 
     const setTheme = useCallback((nextTheme: Theme) => {
         if (typeof window !== "undefined") {
@@ -58,12 +63,24 @@ export function useTheme() {
     }, [setNextTheme]);
 
     const toggleTheme = useCallback(() => {
-        setTheme(activeTheme === "dark" ? "light" : "dark");
-    }, [activeTheme, setTheme]);
+        if (selectedTheme === "light") {
+            setTheme("dark");
+            return;
+        }
+
+        if (selectedTheme === "dark") {
+            setTheme("system");
+            return;
+        }
+
+        setTheme("light");
+    }, [selectedTheme, setTheme]);
 
     return {
         ...rest,
-        theme: activeTheme,
+        mounted,
+        resolvedTheme: activeTheme,
+        theme: selectedTheme,
         setTheme,
         toggleTheme,
     };

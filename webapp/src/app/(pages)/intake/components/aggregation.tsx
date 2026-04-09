@@ -8,7 +8,7 @@ import { TodoReminderAggregation } from "./aggregations/todo-reminder-aggregatio
 
 export function Aggregation() {
     return (
-        <section className="flex h-full flex-col border-l border-b border-white/10 bg-white/5 p-4">
+        <section className="flex h-full flex-col border-l border-b border-neutral-200/80 bg-neutral-50/70 p-4 dark:border-white/10 dark:bg-white/5">
             <div className="flex h-full flex-col gap-3 overflow-auto pr-1">
                 <TodoReminderAggregation />
                 <LinkPreviewAggregation />
