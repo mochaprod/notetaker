@@ -28,5 +28,9 @@ export const createKeyDownHandler = (editor: Editor) => (event: KeyboardEvent<HT
                 });
             }
         }
+    } else if (event.key === "Enter" && event.shiftKey) {
+        event.preventDefault();
+
+        Editor.insertText(editor, "\n");
     }
 }

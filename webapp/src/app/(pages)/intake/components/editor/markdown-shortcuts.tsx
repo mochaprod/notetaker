@@ -2,8 +2,9 @@
 
 import { Editor, Element as SlateElement, Range, Transforms } from "slate";
 import type { BaseEditor, Descendant } from "slate";
-import { type ReactEditor, type RenderElementProps } from "slate-react";
+import { ReactEditor, useSlateStatic, type RenderElementProps } from "slate-react";
 import { handleEditorInsertBreak } from "./break-handlers";
+import { TopLevelBlock } from "./top-level-block";
 
 export type CustomText = {
     text: string;
@@ -167,44 +168,65 @@ export function withMarkdownShortcuts<T extends Editor>(editor: T): T {
     return editor;
 }
 
-export function renderMarkdownElement({ attributes, children, element }: RenderElementProps) {
-    switch (element.type) {
-        case "heading-one":
-            return (
-                <h1 { ...attributes } className="text-3xl font-semibold tracking-tight text-neutral-950 dark:text-neutral-50">
-                    { children }
-                </h1>
-            );
-        case "heading-two":
-            return (
-                <h2 { ...attributes } className="text-2xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
-                    { children }
-                </h2>
-            );
-        case "blockquote":
-            return (
-                <blockquote { ...attributes } className="border-l-2 border-neutral-300 pl-4 text-neutral-600 italic dark:border-neutral-700 dark:text-neutral-300">
-                    { children }
-                </blockquote>
-            );
-        case "bulleted-list":
-            return (
-                <ul { ...attributes } className="list-outside list-disc space-y-1 pl-6">
-                    { children }
-                </ul>
-            );
-        case "list-item":
-            return (
-                <li { ...attributes } className="pl-1">
-                    { children }
-                </li>
-            );
-        case "paragraph":
-        default:
-            return (
-                <p { ...attributes }>
-                    { children }
-                </p>
-            );
+function MarkdownElement(props: RenderElementProps) {
+    const editor = useSlateStatic();
+    const { attributes, children, element } = props;
+    const elementPath = ReactEditor.findPath(editor, element);
+    const isTopLevelBlock = elementPath.length === 1;
+
+    const renderedElement = (() => {
+        switch (element.type) {
+            case "heading-one":
+                return (
+                    <h1 className="text-3xl font-semibold tracking-tight text-neutral-950 dark:text-neutral-50">
+                        { children }
+                    </h1>
+                );
+            case "heading-two":
+                return (
+                    <h2 className="text-2xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
+                        { children }
+                    </h2>
+                );
+            case "blockquote":
+                return (
+                    <blockquote className="border-l-2 border-neutral-300 pl-4 text-neutral-600 italic dark:border-neutral-700 dark:text-neutral-300">
+                        { children }
+                    </blockquote>
+                );
+            case "bulleted-list":
+                return (
+                    <ul className="list-outside list-disc space-y-1 pl-6">
+                        { children }
+                    </ul>
+                );
+            case "list-item":
+                return (
+                    <li { ...attributes } className="pl-1 whitespace-pre-wrap">
+                        { children }
+                    </li>
+                );
+            case "paragraph":
+            default:
+                return (
+                    <p>
+                        { children }
+                    </p>
+                );
+        }
+    })();
+
+    if (!isTopLevelBlock) {
+        return renderedElement;
     }
+
+    return (
+        <TopLevelBlock attributes={ attributes } element={ element }>
+            { renderedElement }
+        </TopLevelBlock>
+    );
+}
+
+export function renderMarkdownElement(props: RenderElementProps) {
+    return <MarkdownElement { ...props } />;
 }

@@ -63,3 +63,6 @@ From project root:
 ## Conventions
 - Pure CSS is absolutely not allowed. Use Tailwind 99.99% of the time.
 - No tabs, uses spaces. Indents should be 4 spaces.
+
+## Guidelines
+- IMPORTANT: Always prompt before making any code changes!

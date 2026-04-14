@@ -1,5 +1,3 @@
-"use client";
-
 import { Editor, Element as SlateElement, Path, Range, Transforms } from "slate";
 
 type BreakElementType = "paragraph" | "heading-one" | "heading-two" | "blockquote" | "list-item" | "bulleted-list";
