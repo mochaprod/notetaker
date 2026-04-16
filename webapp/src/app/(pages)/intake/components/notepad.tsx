@@ -1,13 +1,13 @@
 "use client";
 
-import { useMemo } from "react";
+import { useState } from "react";
 import { createEditor } from "slate";
 import { Editable, Slate, withReact } from "slate-react";
 import { createKeyDownHandler } from "./editor/key-down-handler";
 import { initialEditorValue, renderMarkdownElement, withMarkdownShortcuts } from "./editor/markdown-shortcuts";
 
 export function Notepad() {
-    const editor = useMemo(() => withMarkdownShortcuts(withReact(createEditor())), []);
+    const [editor] = useState(() => withMarkdownShortcuts(withReact(createEditor())));
 
     return (
         <section className="flex h-full flex-col border-b border-neutral-200/80 bg-white/80 p-6 backdrop-blur-sm dark:border-white/10 dark:bg-white/10">

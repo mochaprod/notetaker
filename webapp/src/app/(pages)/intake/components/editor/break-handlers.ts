@@ -111,13 +111,25 @@ const handleListItemBreak: BreakHandler = (editor, targetPath, originalInsertBre
         return;
     }
 
-    if (currentText.length > 0) {
+    if (!selection || !Range.isRange(selection)) {
         originalInsertBreak();
         return;
     }
 
-    if (!selection || !Range.isRange(selection)) {
-        originalInsertBreak();
+    if (currentText.length > 0) {
+        Editor.withoutNormalizing(editor, () => {
+            Transforms.splitNodes(editor, {
+                at: selection,
+                match: (_, path) => Path.equals(path, targetPath),
+                always: true,
+            });
+
+            Transforms.setNodes(editor, {
+                variant: "default",
+            }, {
+                at: Path.next(targetPath),
+            });
+        });
         return;
     }
 
