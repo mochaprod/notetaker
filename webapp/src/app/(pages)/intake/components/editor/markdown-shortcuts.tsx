@@ -10,6 +10,7 @@ import { installInsertTextOverride } from "./overrides/insert-text";
 import { TopLevelBlock } from "./top-level-block";
 import type { ParagraphElement } from "./types";
 import { installNormalizeNode } from "./overrides/normalize-node";
+import clsx from "clsx";
 
 const createParagraph = (): ParagraphElement => ({
     type: "paragraph",
@@ -34,6 +35,16 @@ export function withMarkdownShortcuts<T extends Editor>(editor: T): T {
     installNormalizeNode(editor, normalizeNode);
 
     return editor;
+}
+
+const LIST_STYLES = [
+    "list-disc",
+    "list-[square]",
+    "list-[circle]",
+];
+
+function getListStyle(pathLength: number) {
+    return LIST_STYLES[(pathLength - 1) % LIST_STYLES.length];
 }
 
 function MarkdownElement(props: RenderElementProps) {
@@ -64,9 +75,15 @@ function MarkdownElement(props: RenderElementProps) {
                 );
             case "bulleted-list":
                 return (
-                    <ul className="list-outside list-disc space-y-1 pl-6">
+                    <ul className={ clsx("list-outside space-y-1 pl-6", getListStyle(elementPath.length)) }>
                         { children }
                     </ul>
+                );
+            case "numbered-list":
+                return (
+                    <ol className="list-outside list-decimal space-y-1 pl-6">
+                        { children }
+                    </ol>
                 );
             case "list-item":
                 return (
