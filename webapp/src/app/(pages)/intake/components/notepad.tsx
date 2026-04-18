@@ -4,7 +4,12 @@ import { useState } from "react";
 import { createEditor } from "slate";
 import { Editable, Slate, withReact } from "slate-react";
 import { createKeyDownHandler } from "./editor/key-down-handler";
-import { initialEditorValue, renderMarkdownElement, withMarkdownShortcuts } from "./editor/markdown-shortcuts";
+import {
+    initialEditorValue,
+    renderMarkdownElement,
+    renderMarkdownLeaf,
+    withMarkdownShortcuts,
+} from "./editor/markdown-shortcuts";
 
 export function Notepad() {
     const [editor] = useState(() => withMarkdownShortcuts(withReact(createEditor())));
@@ -18,6 +23,7 @@ export function Notepad() {
                 <Editable
                     placeholder="Start writing..."
                     renderElement={ renderMarkdownElement }
+                    renderLeaf={ renderMarkdownLeaf }
                     className="min-h-full w-full bg-transparent text-lg leading-6 text-neutral-900 caret-neutral-950 outline-none selection:bg-neutral-900/15 selection:text-neutral-950 [&_[data-slate-placeholder='true']]:text-neutral-400 dark:text-neutral-100 dark:caret-white dark:selection:bg-white/20 dark:selection:text-white dark:[&_[data-slate-placeholder='true']]:text-neutral-500"
                     onKeyDown={ createKeyDownHandler(editor) }
                 />

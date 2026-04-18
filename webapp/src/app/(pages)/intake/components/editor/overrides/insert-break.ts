@@ -7,5 +7,6 @@ export function installInsertBreakOverride<T extends Editor>(
 ) {
     editor.insertBreak = () => {
         handleEditorInsertBreak(editor, originalInsertBreak);
+        console.log(editor.children);
     };
 }

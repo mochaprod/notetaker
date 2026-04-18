@@ -2,10 +2,11 @@
 
 import { cn } from "@/lib/utils";
 import type { Descendant, Editor } from "slate";
-import { ReactEditor, useSlateStatic, type RenderElementProps } from "slate-react";
+import { ReactEditor, useSlateStatic, type RenderElementProps, type RenderLeafProps } from "slate-react";
 import { installDeleteBackwardOverride } from "./overrides/delete-backward";
 import { installDeleteFragmentOverride } from "./overrides/delete-fragment";
 import { installInsertBreakOverride } from "./overrides/insert-break";
+import { installInlineMarkdownMarkOverride } from "./overrides/insert-inline-marks";
 import { installInsertTextOverride } from "./overrides/insert-text";
 import { TopLevelBlock } from "./top-level-block";
 import type { ParagraphElement } from "./types";
@@ -29,6 +30,7 @@ export function withMarkdownShortcuts<T extends Editor>(editor: T): T {
     } = editor;
 
     installInsertTextOverride(editor, insertText);
+    installInlineMarkdownMarkOverride(editor, editor.insertText);
     installInsertBreakOverride(editor, insertBreak);
     installDeleteBackwardOverride(editor, deleteBackward);
     installDeleteFragmentOverride(editor, deleteFragment);
@@ -122,4 +124,26 @@ function MarkdownElement(props: RenderElementProps) {
 
 export function renderMarkdownElement(props: RenderElementProps) {
     return <MarkdownElement { ...props } />;
+}
+
+function MarkdownLeaf({ attributes, children, leaf }: RenderLeafProps) {
+    let renderedChildren = children;
+
+    if (leaf.bold) {
+        renderedChildren = <strong>{ renderedChildren }</strong>;
+    }
+
+    if (leaf.italic) {
+        renderedChildren = <em>{ renderedChildren }</em>;
+    }
+
+    return (
+        <span { ...attributes }>
+            { renderedChildren }
+        </span>
+    );
+}
+
+export function renderMarkdownLeaf(props: RenderLeafProps) {
+    return <MarkdownLeaf { ...props } />;
 }

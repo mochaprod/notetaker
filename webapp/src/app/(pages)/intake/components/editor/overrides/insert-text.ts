@@ -1,4 +1,4 @@
-import { Editor, Element as SlateElement, Path, Range, Transforms } from "slate";
+import { Editor, Element as SlateElement, Node, Path, Range, Text, Transforms } from "slate";
 import type {
     BulletedListElement,
     BlockquoteElement,
@@ -106,6 +106,42 @@ const createCollapsedSelection = (path: Path) => ({
     },
 });
 
+const getActiveTextPathWithinListItem = (editor: Editor, listItemPath: Path): Path | null => {
+    const anchorPath = editor.selection?.anchor.path;
+
+    if (anchorPath && Path.isDescendant(anchorPath, listItemPath)) {
+        const [anchorNode] = Editor.node(editor, anchorPath);
+
+        if (Text.isText(anchorNode)) {
+            return anchorPath;
+        }
+    }
+
+    const textNode = Editor.nodes(editor, {
+        at: listItemPath,
+        match: Text.isText,
+        mode: "all",
+    }).next().value;
+
+    return textNode?.[1] ?? null;
+};
+
+const getListItemShortcutText = (editor: Editor, listItemPath: Path): string | null => {
+    const textPath = getActiveTextPathWithinListItem(editor, listItemPath);
+
+    if (!textPath) {
+        return null;
+    }
+
+    const textNode = Node.get(editor, textPath);
+
+    if (!Text.isText(textNode)) {
+        return null;
+    }
+
+    return textNode.text;
+};
+
 const applyTopLevelMarkdownShortcut = (
     editor: Editor,
     path: Path,
@@ -143,8 +179,9 @@ const applyListItemMarkdownShortcut = (
     insertLiteralText: (text: string) => void,
 ) => {
     const variant = getListItemVariantFromShortcut(shortcut);
+    const textPath = getActiveTextPathWithinListItem(editor, path);
 
-    if (!variant) {
+    if (!variant || !textPath) {
         insertLiteralText(" ");
         return;
     }
@@ -153,11 +190,11 @@ const applyListItemMarkdownShortcut = (
         Transforms.delete(editor, {
             at: {
                 anchor: {
-                    path: path.concat([0]),
+                    path: textPath,
                     offset: 0,
                 },
                 focus: {
-                    path: path.concat([0]),
+                    path: textPath,
                     offset: shortcut.length,
                 },
             },
@@ -169,7 +206,7 @@ const applyListItemMarkdownShortcut = (
             at: path,
         });
 
-        Transforms.select(editor, createCollapsedSelection(path.concat([0])));
+        Transforms.select(editor, createCollapsedSelection(textPath));
     });
 };
 
@@ -196,7 +233,10 @@ export function installInsertTextOverride<T extends Editor>(
         }
 
         const { path } = shortcutTarget;
-        const shortcut = MARKDOWN_SHORTCUTS[Editor.string(editor, path)];
+        const shortcutText = shortcutTarget.kind === "list-item"
+            ? getListItemShortcutText(editor, path)
+            : Editor.string(editor, path);
+        const shortcut = shortcutText ? MARKDOWN_SHORTCUTS[shortcutText] : undefined;
 
         if (!shortcut) {
             originalInsertText(text);

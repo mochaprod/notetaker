@@ -11,6 +11,8 @@ export function isListType(type: string): boolean {
 
 export type CustomText = {
     text: string;
+    bold?: true;
+    italic?: true;
 };
 
 export type ParagraphElement = {
