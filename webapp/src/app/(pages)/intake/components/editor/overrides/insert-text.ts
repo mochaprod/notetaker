@@ -3,19 +3,35 @@ import type {
     BulletedListElement,
     BlockquoteElement,
     CustomElement,
+    HeadingFiveElement,
+    HeadingFourElement,
     HeadingOneElement,
+    HeadingSixElement,
+    HeadingThreeElement,
     HeadingTwoElement,
     ListItemVariant,
     ParagraphElement,
 } from "../types";
 
-type MarkdownShortcut = "heading-one" | "heading-two" | "blockquote" | "bulleted-list";
+type MarkdownShortcut =
+    | "heading-one"
+    | "heading-two"
+    | "heading-three"
+    | "heading-four"
+    | "heading-five"
+    | "heading-six"
+    | "blockquote"
+    | "bulleted-list";
 
 type MarkdownShortcutTarget =
     | { kind: "top-level"; path: Path }
     | { kind: "list-item"; path: Path };
 
 const MARKDOWN_SHORTCUTS: { trigger: string; shortcut: MarkdownShortcut }[] = [
+    { trigger: "######", shortcut: "heading-six" },
+    { trigger: "#####", shortcut: "heading-five" },
+    { trigger: "####", shortcut: "heading-four" },
+    { trigger: "###", shortcut: "heading-three" },
     { trigger: "##", shortcut: "heading-two" },
     { trigger: "#", shortcut: "heading-one" },
     { trigger: ">", shortcut: "blockquote" },
@@ -75,6 +91,26 @@ const createElementFromShortcut = (shortcut: MarkdownShortcut, text: string): Cu
                 type: "heading-two",
                 children: [{ text }],
             } satisfies HeadingTwoElement;
+        case "heading-three":
+            return {
+                type: "heading-three",
+                children: [{ text }],
+            } satisfies HeadingThreeElement;
+        case "heading-four":
+            return {
+                type: "heading-four",
+                children: [{ text }],
+            } satisfies HeadingFourElement;
+        case "heading-five":
+            return {
+                type: "heading-five",
+                children: [{ text }],
+            } satisfies HeadingFiveElement;
+        case "heading-six":
+            return {
+                type: "heading-six",
+                children: [{ text }],
+            } satisfies HeadingSixElement;
         case "blockquote":
             return {
                 type: "blockquote",
@@ -182,6 +218,14 @@ const getListItemVariantFromShortcut = (shortcut: MarkdownShortcut): ListItemVar
             return "heading-one";
         case "heading-two":
             return "heading-two";
+        case "heading-three":
+            return "heading-three";
+        case "heading-four":
+            return "heading-four";
+        case "heading-five":
+            return "heading-five";
+        case "heading-six":
+            return "heading-six";
         case "blockquote":
             return "blockquote";
         default:

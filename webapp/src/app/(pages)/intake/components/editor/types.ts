@@ -30,12 +30,40 @@ export type HeadingTwoElement = {
     children: CustomText[];
 };
 
+export type HeadingThreeElement = {
+    type: "heading-three";
+    children: CustomText[];
+};
+
+export type HeadingFourElement = {
+    type: "heading-four";
+    children: CustomText[];
+};
+
+export type HeadingFiveElement = {
+    type: "heading-five";
+    children: CustomText[];
+};
+
+export type HeadingSixElement = {
+    type: "heading-six";
+    children: CustomText[];
+};
+
 export type BlockquoteElement = {
     type: "blockquote";
     children: CustomText[];
 };
 
-export type ListItemVariant = "default" | "heading-one" | "heading-two" | "blockquote";
+export type ListItemVariant =
+    | "default"
+    | "heading-one"
+    | "heading-two"
+    | "heading-three"
+    | "heading-four"
+    | "heading-five"
+    | "heading-six"
+    | "blockquote";
 
 export type ListItemElement = {
     type: "list-item";
@@ -57,6 +85,10 @@ export type CustomElement =
     | ParagraphElement
     | HeadingOneElement
     | HeadingTwoElement
+    | HeadingThreeElement
+    | HeadingFourElement
+    | HeadingFiveElement
+    | HeadingSixElement
     | BlockquoteElement
     | ListItemElement
     | BulletedListElement

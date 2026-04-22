@@ -69,6 +69,30 @@ function MarkdownElement(props: RenderElementProps) {
                         { children }
                     </h2>
                 );
+            case "heading-three":
+                return (
+                    <h3 className="text-xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
+                        { children }
+                    </h3>
+                );
+            case "heading-four":
+                return (
+                    <h4 className="text-lg font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
+                        { children }
+                    </h4>
+                );
+            case "heading-five":
+                return (
+                    <h5 className="text-base font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
+                        { children }
+                    </h5>
+                );
+            case "heading-six":
+                return (
+                    <h6 className="text-sm font-semibold uppercase tracking-[0.12em] text-neutral-700 dark:text-neutral-200">
+                        { children }
+                    </h6>
+                );
             case "blockquote":
                 return (
                     <blockquote className="border-l-2 border-neutral-300 pl-4 text-neutral-600 italic dark:border-neutral-700 dark:text-neutral-300">
@@ -95,6 +119,10 @@ function MarkdownElement(props: RenderElementProps) {
                             "pl-1 whitespace-pre-wrap",
                             element.variant === "heading-one" && "text-2xl font-semibold tracking-tight text-neutral-950 dark:text-neutral-50",
                             element.variant === "heading-two" && "text-xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100",
+                            element.variant === "heading-three" && "text-lg font-semibold tracking-tight text-neutral-900 dark:text-neutral-100",
+                            element.variant === "heading-four" && "text-base font-semibold tracking-tight text-neutral-900 dark:text-neutral-100",
+                            element.variant === "heading-five" && "text-sm font-semibold tracking-tight text-neutral-900 dark:text-neutral-100",
+                            element.variant === "heading-six" && "text-xs font-semibold uppercase tracking-[0.12em] text-neutral-700 dark:text-neutral-200",
                             element.variant === "blockquote" && "border-l-2 border-neutral-300 pl-4 text-neutral-600 italic dark:border-neutral-700 dark:text-neutral-300",
                         )}
                     >

@@ -1,6 +1,16 @@
 import { Editor, Element as SlateElement, Path, Range, Transforms } from "slate";
 
-type BreakElementType = "paragraph" | "heading-one" | "heading-two" | "blockquote" | "list-item" | "bulleted-list";
+type BreakElementType =
+    | "paragraph"
+    | "heading-one"
+    | "heading-two"
+    | "heading-three"
+    | "heading-four"
+    | "heading-five"
+    | "heading-six"
+    | "blockquote"
+    | "list-item"
+    | "bulleted-list";
 
 type BreakTarget = {
     type: BreakElementType;
@@ -140,6 +150,10 @@ const BREAK_HANDLERS: Partial<Record<BreakElementType, BreakHandler>> = {
     paragraph: handleParagraphBreak,
     "heading-one": handleResettingBlockBreak,
     "heading-two": handleResettingBlockBreak,
+    "heading-three": handleResettingBlockBreak,
+    "heading-four": handleResettingBlockBreak,
+    "heading-five": handleResettingBlockBreak,
+    "heading-six": handleResettingBlockBreak,
     blockquote: handleResettingBlockBreak,
     "list-item": handleListItemBreak,
 };
