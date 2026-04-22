@@ -1,7 +1,7 @@
 "use client";
 
 import { SignUpForm, SignUpFormData } from "./signup-form";
-import { authClient } from "@/lib/auth-client";
+import { authClientEmailSignUpAdapter } from "@/lib/auth-client";
 import { useCallback, useState } from "react";
 import { AuthNavbar } from "../../components/auth-navbar";
 
@@ -15,21 +15,22 @@ export function SignUpFormState() {
         name,
         password,
     }: Omit<SignUpFormData, "confirmPassword">) => {
-        const { data, error } = await authClient.signUp.email({
-            email,
-            name,
-            password,
-        }, {
-            onRequest: () => {
-                setLoading(true);
-            },
-            onSuccess: () => {
-                setSuccess(true);
-            },
-            onError: () => {
-                setError(true);
-            },
-        });
+        setError(false);
+        setSuccess(false);
+        setLoading(true);
+
+        try {
+            await authClientEmailSignUpAdapter({
+                email,
+                name,
+                password,
+            });
+            setLoading(false);
+            setSuccess(true);
+        } catch {
+            setLoading(false);
+            setError(true);
+        }
     }, []);
 
     return (

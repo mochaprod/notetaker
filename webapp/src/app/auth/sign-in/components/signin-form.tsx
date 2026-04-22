@@ -1,29 +1,27 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
     Card,
     CardContent,
-    CardDescription,
     CardHeader,
-    CardTitle,
+    CardTitle
 } from "@/components/ui/card";
 import {
     Field,
     FieldDescription,
     FieldGroup,
-    FieldLabel,
-    FieldSeparator,
+    FieldLabel
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { AuthClientEmailSignInData } from "@/lib/auth-client";
-import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import z from "zod/v4";
-import { useCallback } from "react";
 import { TriangleAlert } from "lucide-react";
 import Link from "next/link";
+import { useCallback } from "react";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import z from "zod/v4";
 import { Spinner } from "../../../../components/ui/spinner";
 
 export type LoginFormProps = React.ComponentProps<"div"> & {

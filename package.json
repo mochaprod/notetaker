@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "pnpm --filter @common/types test && pnpm --filter webapp test",
+    "test:coverage": "pnpm --filter @common/types test:coverage && pnpm --filter webapp test:coverage"
   },
   "keywords": [],
   "author": "",

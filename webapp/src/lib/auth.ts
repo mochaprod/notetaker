@@ -1,12 +1,19 @@
 import { betterAuth } from "better-auth";
-import { prismaAdapter } from "better-auth/adapters/prisma";
-import { prisma } from "@db/prisma";
+import { credentialsAuth } from "@/lib/auth/credentials-plugin";
 
 export const auth = betterAuth({
-    emailAndPassword: {
-        enabled: true,
+    session: {
+        cookieCache: {
+            enabled: true,
+            strategy: "jwe",
+            refreshCache: true,
+        },
     },
-    database: prismaAdapter(prisma, {
-        provider: "postgresql",
-    }),
+    account: {
+        storeStateStrategy: "cookie",
+        storeAccountCookie: true,
+    },
+    plugins: [
+        credentialsAuth(),
+    ],
 });

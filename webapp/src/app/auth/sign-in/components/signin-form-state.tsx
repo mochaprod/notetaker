@@ -1,6 +1,6 @@
 "use client";
 
-import { authClient, AuthClientEmailSignInData } from "@/lib/auth-client";
+import { AuthClientEmailSignInData, authClientEmailSignInAdapter } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import { AuthNavbar } from "../../components/auth-navbar";
@@ -16,23 +16,21 @@ export default function SignInFormState() {
         email,
         password,
     }: AuthClientEmailSignInData) => {
-        const {} = await authClient.signIn.email({
-            email,
-            password,
-        }, {
-            onRequest: () => {
-                setLoading(true);
-            },
-            onSuccess: () => {
-                setLoading(false);
-                router.push("/");
-            },
-            onError: (err) => {
-                setLoading(false);
-                setError(true);
-            },
-        });
-    }, []);
+        setError(false);
+        setLoading(true);
+
+        try {
+            await authClientEmailSignInAdapter({
+                email,
+                password,
+            });
+            setLoading(false);
+            router.push("/");
+        } catch {
+            setLoading(false);
+            setError(true);
+        }
+    }, [router]);
 
     return (
         <div className="min-h-svh bg-background text-foreground">
