@@ -158,8 +158,6 @@ const applyInlineMarkdownMark = (
             Editor.removeMark(editor, "italic");
         }
     });
-
-    console.log(editor.children);
 };
 
 export function installInlineMarkdownMarkOverride<T extends Editor>(
