@@ -15,13 +15,13 @@ type MarkdownShortcutTarget =
     | { kind: "top-level"; path: Path }
     | { kind: "list-item"; path: Path };
 
-const MARKDOWN_SHORTCUTS: Record<string, MarkdownShortcut> = {
-    "#": "heading-one",
-    "##": "heading-two",
-    ">": "blockquote",
-    "-": "bulleted-list",
-    "*": "bulleted-list",
-};
+const MARKDOWN_SHORTCUTS: { trigger: string; shortcut: MarkdownShortcut }[] = [
+    { trigger: "##", shortcut: "heading-two" },
+    { trigger: "#", shortcut: "heading-one" },
+    { trigger: ">", shortcut: "blockquote" },
+    { trigger: "-", shortcut: "bulleted-list" },
+    { trigger: "*", shortcut: "bulleted-list" },
+];
 
 const findTopLevelBlock = (editor: Editor) => Editor.above(editor, {
     at: editor.selection?.anchor,
@@ -63,22 +63,22 @@ const createParagraph = (): ParagraphElement => ({
     children: [{ text: "" }],
 });
 
-const createElementFromShortcut = (shortcut: MarkdownShortcut): CustomElement => {
+const createElementFromShortcut = (shortcut: MarkdownShortcut, text: string): CustomElement => {
     switch (shortcut) {
         case "heading-one":
             return {
                 type: "heading-one",
-                children: [{ text: "" }],
+                children: [{ text }],
             } satisfies HeadingOneElement;
         case "heading-two":
             return {
                 type: "heading-two",
-                children: [{ text: "" }],
+                children: [{ text }],
             } satisfies HeadingTwoElement;
         case "blockquote":
             return {
                 type: "blockquote",
-                children: [{ text: "" }],
+                children: [{ text }],
             } satisfies BlockquoteElement;
         case "bulleted-list":
             return {
@@ -86,7 +86,7 @@ const createElementFromShortcut = (shortcut: MarkdownShortcut): CustomElement =>
                 children: [
                     {
                         type: "list-item",
-                        children: [{ text: "" }],
+                        children: [{ text }],
                     },
                 ],
             } satisfies BulletedListElement;
@@ -142,20 +142,37 @@ const getListItemShortcutText = (editor: Editor, listItemPath: Path): string | n
     return textNode.text;
 };
 
+const getMarkdownShortcutMatch = (text: string) => {
+    return MARKDOWN_SHORTCUTS.find(({ trigger }) => text.startsWith(trigger)) ?? null;
+};
+
 const applyTopLevelMarkdownShortcut = (
     editor: Editor,
     path: Path,
     shortcut: MarkdownShortcut,
+    trigger: string,
+    text: string,
 ) => {
+    const remainingText = text.slice(trigger.length);
+
     Editor.withoutNormalizing(editor, () => {
         Transforms.removeNodes(editor, { at: path });
-        Transforms.insertNodes(editor, createElementFromShortcut(shortcut), { at: path });
+        Transforms.insertNodes(editor, createElementFromShortcut(shortcut, remainingText), { at: path });
 
         const selectionPath = shortcut === "bulleted-list"
             ? path.concat([0, 0])
             : path.concat([0]);
 
-        Transforms.select(editor, createCollapsedSelection(selectionPath));
+        Transforms.select(editor, {
+            anchor: {
+                path: selectionPath,
+                offset: remainingText.length,
+            },
+            focus: {
+                path: selectionPath,
+                offset: remainingText.length,
+            },
+        });
     });
 };
 
@@ -176,10 +193,12 @@ const applyListItemMarkdownShortcut = (
     editor: Editor,
     path: Path,
     shortcut: MarkdownShortcut,
+    trigger: string,
     insertLiteralText: (text: string) => void,
 ) => {
     const variant = getListItemVariantFromShortcut(shortcut);
     const textPath = getActiveTextPathWithinListItem(editor, path);
+    const anchorOffset = editor.selection?.anchor.offset ?? 0;
 
     if (!variant || !textPath) {
         insertLiteralText(" ");
@@ -195,7 +214,7 @@ const applyListItemMarkdownShortcut = (
                 },
                 focus: {
                     path: textPath,
-                    offset: shortcut.length,
+                    offset: trigger.length,
                 },
             },
         });
@@ -206,7 +225,16 @@ const applyListItemMarkdownShortcut = (
             at: path,
         });
 
-        Transforms.select(editor, createCollapsedSelection(textPath));
+        Transforms.select(editor, {
+            anchor: {
+                path: textPath,
+                offset: Math.max(anchorOffset - trigger.length, 0),
+            },
+            focus: {
+                path: textPath,
+                offset: Math.max(anchorOffset - trigger.length, 0),
+            },
+        });
     });
 };
 
@@ -236,18 +264,19 @@ export function installInsertTextOverride<T extends Editor>(
         const shortcutText = shortcutTarget.kind === "list-item"
             ? getListItemShortcutText(editor, path)
             : Editor.string(editor, path);
-        const shortcut = shortcutText ? MARKDOWN_SHORTCUTS[shortcutText] : undefined;
+        const shortcutMatch = shortcutText ? getMarkdownShortcutMatch(shortcutText) : null;
+        const shortcut = shortcutMatch?.shortcut;
 
-        if (!shortcut) {
+        if (!shortcut || !shortcutMatch || !shortcutText) {
             originalInsertText(text);
             return;
         }
 
         if (shortcutTarget.kind === "list-item") {
-            applyListItemMarkdownShortcut(editor, path, shortcut, originalInsertText);
+            applyListItemMarkdownShortcut(editor, path, shortcut, shortcutMatch.trigger, originalInsertText);
             return;
         }
 
-        applyTopLevelMarkdownShortcut(editor, path, shortcut);
+        applyTopLevelMarkdownShortcut(editor, path, shortcut, shortcutMatch.trigger, shortcutText);
     };
 }
