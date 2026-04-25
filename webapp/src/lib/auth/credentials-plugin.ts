@@ -15,13 +15,13 @@ const AuthResponseUserSchema = z.object({
 
 const SignUpCredentialsBodySchema = z.object({
     name: z.string().trim().min(1),
-    email: z.string().trim().email(),
+    email: z.email(),
     password: z.string().min(8),
     rememberMe: z.boolean().optional().default(true),
 });
 
 const SignInCredentialsBodySchema = z.object({
-    email: z.string().trim().email(),
+    email: z.email(),
     password: z.string().min(1),
     rememberMe: z.boolean().optional().default(true),
 });

@@ -25,16 +25,13 @@ export function withAuth<P extends object>(
         const session = await auth.api.getSession({
             headers: await headers(),
         });
+        const hasValidSession = !!session?.session;
 
-        if ((session?.session && invert) || (!session?.session && !invert)) {
+        if ((hasValidSession && invert) || (!hasValidSession && !invert)) {
             redirect(redirectTo);
         }
 
-        return (
-            <Component
-                {...props}
-            />
-        );
+        return React.createElement(Component, props);
     };
     ProtectedComponent.displayName = `withAuth(${Component.name})`;
 
