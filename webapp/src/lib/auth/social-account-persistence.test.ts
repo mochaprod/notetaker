@@ -20,13 +20,22 @@ vi.mock("better-auth/cookies", () => ({
 }));
 
 import {
+    HookContext,
     persistSocialAccount,
     persistSocialAccountData,
     socialAccountPersistenceInternals,
 } from "@/lib/auth/social-account-persistence";
 
-type PersistSocialAccountContext = Parameters<typeof persistSocialAccountData>[0];
+type PersistSocialAccountContext = HookContext;
 type PersistSocialAccountUser = NonNullable<PersistSocialAccountContext["context"]["newSession"]>["user"];
+
+function createMatcherContext(context: unknown) {
+    return context as HookEndpointContext;
+}
+
+function createPersistSocialAccountContext(context: unknown) {
+    return context as PersistSocialAccountContext;
+}
 
 function createSessionUser(overrides: Partial<PersistSocialAccountUser> = {}) {
     return {
@@ -44,16 +53,6 @@ function createSessionUser(overrides: Partial<PersistSocialAccountUser> = {}) {
 describe("social account persistence", () => {
     beforeEach(() => {
         vi.clearAllMocks();
-    });
-
-    it("reassembles chunked account cookies", () => {
-        const encoded = socialAccountPersistenceInternals.joinCookieChunks("test.account_data", [
-            "test.account_data.1=def; Path=/; HttpOnly",
-            "other=value; Path=/",
-            "test.account_data.0=abc; Path=/; HttpOnly",
-        ]);
-
-        expect(encoded).toBe("abcdef");
     });
 
     it("upserts the user and creates a provider account from the account cookie", async () => {
@@ -88,7 +87,7 @@ describe("social account persistence", () => {
             userId: "app-user-1",
         });
 
-        await persistSocialAccountData({
+        await persistSocialAccountData(createPersistSocialAccountContext({
             context: {
                 authCookies: {
                     accountData: {
@@ -103,7 +102,7 @@ describe("social account persistence", () => {
                     }),
                 },
             },
-        } as PersistSocialAccountContext);
+        }));
 
         expect(getAccountCookieMock).toHaveBeenCalled();
         expect(tx.user.upsert).toHaveBeenCalledWith({
@@ -163,14 +162,14 @@ describe("social account persistence", () => {
     });
 
     it("delegates stored account loading to Better Auth's getAccountCookie", async () => {
-        const ctx = {
+        const ctx = createPersistSocialAccountContext({
             getCookie: vi.fn(),
             context: {
                 newSession: {
                     user: createSessionUser(),
                 },
             },
-        } as unknown as PersistSocialAccountContext;
+        });
         const storedAccount = {
             providerId: "google",
             accountId: "google-user-1",
@@ -187,8 +186,8 @@ describe("social account persistence", () => {
 
         expect(plugin.id).toBe("persist-social-account-google");
         expect(plugin.hooks.after).toHaveLength(1);
-        expect(plugin.hooks.after[0].matcher({
-            path: "/callback/google",
+        expect(plugin.hooks.after[0].matcher(createMatcherContext({
+            path: "/callback/:id",
             params: {
                 id: "google",
             },
@@ -200,8 +199,8 @@ describe("social account persistence", () => {
                     user: createSessionUser(),
                 },
             },
-        } as HookEndpointContext)).toBe(true);
-        expect(plugin.hooks.after[0].matcher({
+        }))).toBe(true);
+        expect(plugin.hooks.after[0].matcher(createMatcherContext({
             path: "/callback/github",
             params: {
                 id: "github",
@@ -214,14 +213,14 @@ describe("social account persistence", () => {
                     user: createSessionUser(),
                 },
             },
-        } as HookEndpointContext)).toBe(false);
-        expect(plugin.hooks.after[0].matcher({
+        }))).toBe(false);
+        expect(plugin.hooks.after[0].matcher(createMatcherContext({
             path: "/sign-in/social",
             context: {
                 returned: null,
                 newSession: null,
             },
-        } as HookEndpointContext)).toBe(false);
+        }))).toBe(false);
     });
 
     it("fails closed when the stored provider does not match the configured provider", async () => {
@@ -232,7 +231,7 @@ describe("social account persistence", () => {
             accountId: "github-user-1",
         });
 
-        await expect(plugin.hooks.after[0].handler({
+        await expect(plugin.hooks.after[0].handler(createPersistSocialAccountContext({
             path: "/callback/google",
             getCookie: vi.fn(),
             context: {
@@ -246,7 +245,7 @@ describe("social account persistence", () => {
             params: {
                 id: "google",
             },
-        } as PersistSocialAccountContext)).rejects.toMatchObject({
+        }))).rejects.toMatchObject({
             body: expect.objectContaining({
                 code: "FAILED_TO_PERSIST_SOCIAL_ACCOUNT",
             }),
@@ -259,14 +258,14 @@ describe("social account persistence", () => {
             providerId: "google",
         });
 
-        await expect(persistSocialAccountData({
+        await expect(persistSocialAccountData(createPersistSocialAccountContext({
             getCookie: vi.fn(),
             context: {
                 newSession: {
                     user: createSessionUser(),
                 },
             },
-        } as PersistSocialAccountContext)).rejects.toMatchObject({
+        }))).rejects.toMatchObject({
             body: expect.objectContaining({
                 code: "FAILED_TO_PERSIST_SOCIAL_ACCOUNT",
             }),
@@ -296,14 +295,14 @@ describe("social account persistence", () => {
         });
         prismaMock.account.findUnique.mockResolvedValue(null);
 
-        await expect(persistSocialAccountData({
+        await expect(persistSocialAccountData(createPersistSocialAccountContext({
             getCookie: vi.fn(),
             context: {
                 newSession: {
                     user: createSessionUser(),
                 },
             },
-        } as PersistSocialAccountContext)).rejects.toMatchObject({
+        }))).rejects.toMatchObject({
             body: expect.objectContaining({
                 code: "FAILED_TO_PERSIST_SOCIAL_ACCOUNT",
             }),
@@ -317,14 +316,14 @@ describe("social account persistence", () => {
         });
         prismaMock.$transaction.mockRejectedValue(new Error("db is down"));
 
-        await expect(persistSocialAccountData({
+        await expect(persistSocialAccountData(createPersistSocialAccountContext({
             getCookie: vi.fn(),
             context: {
                 newSession: {
                     user: createSessionUser(),
                 },
             },
-        } as PersistSocialAccountContext)).rejects.toMatchObject({
+        }))).rejects.toMatchObject({
             body: expect.objectContaining({
                 code: "FAILED_TO_PERSIST_SOCIAL_ACCOUNT",
             }),

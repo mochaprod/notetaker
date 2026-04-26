@@ -14,6 +14,7 @@ import {
     FieldLabel
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 import { authClient, AuthClientEmailSignInData } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,7 +23,6 @@ import Link from "next/link";
 import { useCallback } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import z from "zod/v4";
-import { Spinner } from "../../../../components/ui/spinner";
 
 export type LoginFormProps = React.ComponentProps<"div"> & {
     signIn: (data: AuthClientEmailSignInData) => Promise<void>;

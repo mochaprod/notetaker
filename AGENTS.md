@@ -1,68 +1,76 @@
 # Drift Codebase Summary
 
 ## Overview
-Drift is a pnpm workspace monorepo. The primary app is a Next.js 15 App Router webapp that supports user auth, note capture, AI-generated digests, and a todo list. The backend uses Prisma + PostgreSQL via `@db/prisma` and Better Auth for sessions. AI summarization uses Google Gemini with prompt templates and a small function-calling toolset for date handling. Notes are additionally pushed into Pinecone for vector search (Chroma client scaffolding also exists).
+Drift is a pnpm workspace monorepo. The primary app is a Next.js 15 App Router webapp built around authentication, an intake/notepad workspace, and a todo list. The backend uses Prisma + PostgreSQL via `@db/prisma`, and Better Auth handles sessions plus account flows.
 
 ## Repository Layout
 `webapp/`: Next.js application (UI, API routes, server actions).
 `packages/prisma/`: Prisma schema, migrations, generated client, and adapter setup.
 `packages/types/`: Shared Zod schemas and types.
-`packages/llm/`: Empty directory at the moment.
+`packages/llm/`: Present but currently unused / effectively empty.
 
 ## Core App Flow
-Notes:
-- `webapp/src/app/(pages)/write` posts notes via a server action (`addNote`) and optimistically updates the React Query cache.
-- Notes are read from `/api/notes` using `fetchNotesByDate` and shown on the Notes page with edit/delete optimistic mutations.
-- Note writes update Postgres and also upsert into Pinecone (`pineconeDB.upsert`).
+Auth:
+- Better Auth routes are mounted at `/api/auth/[...all]`.
+- Credentials auth is implemented through a custom Better Auth plugin (`credentialsAuth`) with custom sign-in and sign-up endpoints.
+- Google social sign-in is enabled.
+- Social provider accounts are persisted to Prisma through the `persistSocialAccount` plugin hook, not through a Better Auth Prisma adapter.
+- Client auth uses `better-auth/react` with a hardcoded base URL (`http://localhost:3000`).
 
-Digest / Summaries:
-- `/api/summarize` validates auth, enforces daily AI credits, checks for an existing summary, and otherwise runs Gemini-based summarization over notes for a date range.
-- Summaries are stored in Postgres as `Digest` rows with child items, themes, corrections, and follow-ups.
-- The Digest page queries `/api/summarize` and renders summary text and action items; it can force re-summarization.
+Intake:
+- `/intake` is the active protected workspace route.
+- The page is split between a client-side Slate editor (`Notepad`) and a right-hand aggregation pane.
+- The current intake UI is local/client-side and the aggregation cards are static placeholder UI; there is no saved notepad flow wired end-to-end yet.
 
 Todos:
-- `todos` page uses server actions (`getTodos`, `setTodoStatus`) with React Query for optimistic updates.
-- Digest action menu can add a task as a todo via server action (`addTodo`).
+- `/todos` is an active protected route.
+- The page uses React Query with server actions (`getTodos`, `setTodoStatus`) for loading and optimistic status updates.
+- Todo persistence is handled by `todoRepository` against Prisma/Postgres.
 
-Auth:
-- Better Auth with Prisma adapter. Auth routes are mounted at `/api/auth/[...all]`.
-- Client auth uses `better-auth/react` with a hardcoded base URL (`http://localhost:3000`).
+Deprecated but still present in code:
+- `write`, `notes`, `digest`, `/api/notes`, and `/api/summarize` still exist in the tree and still influence some schema/types, but they should be treated as deprecated architecture when reasoning about current work unless the task explicitly targets them.
 
 ## Data Model (Prisma)
 Key models:
-- `User`, `Account`, `Session`, `Verification`, `AdminUser`, `InviteCode`
-- `Note` linked to `User`
-- `Digest` with `DigestItem`, `DigestTheme`, `DigestCorrection`, `DigestFollowUpQuestion`
-- `Todo`
-- `AICredit` for daily summary credit tracking
+- Active/currently relevant:
+  - `User`, `Account`, `Session`, `Verification`
+  - `Todo`
+  - `Notepad`, `Block` for the intake/editor direction
+- Auth/account specifics:
+  - `Account` enforces uniqueness on `(providerId, accountId)`
+  - credential passwords live on `Account.password`
+- Legacy / deprecation-path models still in schema:
+  - `Note`
+  - `Digest`, `DigestItem`, `DigestTheme`, `DigestCorrection`, `DigestFollowUpQuestion`
+  - `AICredit`
+  - `AdminUser`, `InviteCode`
 
 ## Shared Types
-`@common/types` provides Zod schemas for `Note`, `Summary`, `Todo`, and `AICredit`.
+`@common/types` currently exports `user`, `todo`, plus legacy `notes` and `summary` schemas that are still referenced by deprecated flows.
 
 ## LLM + Embeddings
-- `webapp/src/lib/llm/gemini.ts` handles text summarization + JSON parsing via Gemini models and Zod schemas.
-- Date helper tools are defined for function calling (`next_day`, `add_days`).
-- Embeddings client defaults to Gemini embeddings.
-- Vector support:
-  - Pinecone client is wired and used for note upserts and deletes.
-  - Chroma client exists but is not currently used by the app flow.
+- LLM, embeddings, Pinecone, and summarization code are still present in the repo, but they mainly support deprecated note/digest paths and should not be treated as the primary current product flow.
 
 ## Environment Variables (observed usage)
 `DATABASE_URL`: Prisma/Postgres connection string.
-`PINECONE_API_KEY`, `PINECONE_INDEX_NAME`, `PINECONE_INDEX_HOST`: Pinecone configuration.
-`GCP_PROJECT_ID`, `GCP_LOCATION`: Google Cloud Vertex AI helper (if used).
+`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`: Google social auth configuration.
+`PINECONE_API_KEY`, `PINECONE_INDEX_NAME`, `PINECONE_INDEX_HOST`: Legacy / optional vector integration.
+`GCP_PROJECT_ID`, `GCP_LOCATION`: Legacy / optional Google Cloud / Vertex helper configuration.
 
 ## Dev Commands
 From `webapp/`:
 - `pnpm dev` (Next.js dev server with Turbopack)
 - `pnpm build`
 - `pnpm start`
+- `pnpm test`
+- `pnpm test:coverage`
 From project root:
-- `pnpm --filter webapp run dev`
+- `pnpm test`
+- `pnpm test:coverage`
 
 ## Conventions
 - Pure CSS is absolutely not allowed. Use Tailwind 99.99% of the time.
 - No tabs, uses spaces. Indents should be 4 spaces.
 
 ## Guidelines
-- IMPORTANT: Always prompt before making any code changes!
+- IMPORTANT: Always ask for approval before making any code changes!

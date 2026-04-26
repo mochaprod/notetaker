@@ -2,23 +2,9 @@ import { prisma } from "@db/prisma";
 import type { BetterAuthPlugin, HookEndpointContext } from "better-auth";
 import { APIError, createAuthMiddleware } from "better-auth/api";
 import { getAccountCookie } from "better-auth/cookies";
-import { z } from "zod";
-import { LOGGER } from "../logger";
 
-type HookContext = Parameters<Parameters<typeof createAuthMiddleware>[0]>[0];
+export type HookContext = Parameters<Parameters<typeof createAuthMiddleware>[0]>[0];
 
-const storedAccountSchema = z.object({
-    accountId: z.string(),
-    providerId: z.string(),
-    accessToken: z.string().optional(),
-    refreshToken: z.string().optional(),
-    idToken: z.string().optional(),
-    scope: z.string().optional(),
-    accessTokenExpiresAt: z.union([z.string(), z.date()]).optional(),
-    refreshTokenExpiresAt: z.union([z.string(), z.date()]).optional(),
-});
-
-type StoredAccount = z.infer<typeof storedAccountSchema>;
 type PersistedSocialAccount = {
     userId: string;
     accountId: string;
@@ -31,17 +17,6 @@ function normalizeEmail(email: string) {
 
 function splitSetCookieHeader(setCookieHeader: string) {
     return setCookieHeader.split(/,(?=\s*[^;,=\s]+=[^;,]*)/g).map((value) => value.trim()).filter(Boolean);
-}
-
-function getSetCookieValues(headers: Headers) {
-    const getSetCookie = (headers as Headers & { getSetCookie?: () => string[] }).getSetCookie;
-
-    if (typeof getSetCookie === "function") {
-        return getSetCookie.call(headers);
-    }
-
-    const combined = headers.get("set-cookie");
-    return combined ? splitSetCookieHeader(combined) : [];
 }
 
 function getCookieValue(cookieHeader: string) {
