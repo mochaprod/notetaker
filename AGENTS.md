@@ -48,14 +48,12 @@ Key models:
 ## Shared Types
 `@common/types` currently exports `user`, `todo`, plus legacy `notes` and `summary` schemas that are still referenced by deprecated flows.
 
-## LLM + Embeddings
-- LLM, embeddings, Pinecone, and summarization code are still present in the repo, but they mainly support deprecated note/digest paths and should not be treated as the primary current product flow.
+## LLM
+- LLM and summarization code are still present in the repo, but they mainly support deprecated note/digest paths and should not be treated as the primary current product flow.
 
 ## Environment Variables (observed usage)
 `DATABASE_URL`: Prisma/Postgres connection string.
 `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`: Google social auth configuration.
-`PINECONE_API_KEY`, `PINECONE_INDEX_NAME`, `PINECONE_INDEX_HOST`: Legacy / optional vector integration.
-`GCP_PROJECT_ID`, `GCP_LOCATION`: Legacy / optional Google Cloud / Vertex helper configuration.
 
 ## Dev Commands
 From `webapp/`:
