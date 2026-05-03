@@ -116,27 +116,16 @@ model Note {
 model Notepad {
   id        String   @id @default(uuid()) @db.Uuid
   userId    String
+  dateKey   String
+  title     String   @default("Untitled")
+  content   Json     @db.JsonB
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  blocks    Block[]
 
   @@index([userId])
+  @@unique([userId, dateKey])
   @@map("notepad")
-}
-
-model Block {
-  id         String   @id @default(uuid()) @db.Uuid
-  notepadId  String   @db.Uuid
-  content    Json     @db.JsonB
-  orderIndex Float    @map("index")
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  notepad    Notepad  @relation(fields: [notepadId], references: [id], onDelete: Cascade)
-
-  @@index([notepadId])
-  @@index([notepadId, orderIndex])
-  @@map("block")
 }
 
 model Digest {
