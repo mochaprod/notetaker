@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod/v4";
 
 export const AICreditSchema = z.object({
     credits: z.number().min(0),

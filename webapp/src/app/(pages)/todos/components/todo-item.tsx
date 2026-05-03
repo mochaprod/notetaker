@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Item, ItemContent, ItemDescription } from "@/components/ui/item";
-import { formatDate } from "@/lib/llm/tools";
+import { formatDate } from "@/lib/date";
 import { TodoData } from "@common/types/todo";
 import clsx from "clsx";
 import { CircleCheckIcon, CircleIcon } from "lucide-react";

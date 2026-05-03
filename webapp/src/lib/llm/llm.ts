@@ -1,6 +1,6 @@
-import { Note } from "../../../../packages/types/src/notes";
+import type { Note } from "@common/types/notes";
 import { SummarySchema, TaskSchema } from "@common/types/summary";
-import z from "zod";
+import z from "zod/v4";
 
 export const LLMSummarySchema = SummarySchema.extend({
     tasks: z.array(TaskSchema.extend({

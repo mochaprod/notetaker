@@ -5,7 +5,7 @@ import { Container } from "@/components/custom/container";
 import { QueryParamsDateSelector } from "@/components/custom/query-params-date-selector";
 import { Button } from "@/components/ui/button";
 import { fetchNotesByDate } from "@/lib/api";
-import { formatDate } from "@/lib/llm/tools";
+import { formatDate } from "@/lib/date";
 import { parseDate } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { WandSparklesIcon } from "lucide-react";

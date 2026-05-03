@@ -1,13 +1,13 @@
 import { auth } from "@/lib/auth";
 import { digestRepository, noteRepository, userRepository } from "@/lib/db/db-instance";
 import { Gemini } from "@/lib/llm/gemini";
-import { formatDate } from "@/lib/llm/tools";
+import { formatDate } from "@/lib/date";
 import { LOGGER } from "@/lib/logger";
 import { AICreditError } from "@common/types/user";
 import { differenceInMinutes, isSameDay } from "date-fns";
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-import z from "zod";
+import z from "zod/v4";
 
 const startEndDateSchema = z.object({
     start: z.coerce.date(),

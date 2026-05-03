@@ -1,7 +1,7 @@
 import { createCredentialUser, verifyCredentialUserPassword } from "@/lib/auth/credentials";
 import { setSessionCookie } from "better-auth/cookies";
 import { APIError, createAuthEndpoint, formCsrfMiddleware } from "better-auth/api";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 const AuthResponseUserSchema = z.object({
     id: z.string(),

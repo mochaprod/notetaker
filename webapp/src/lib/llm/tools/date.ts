@@ -1,7 +1,7 @@
 import { FunctionDeclaration, Type } from "@google/genai";
 import { Day, nextDay as nextDayImpl, addDays as addDaysImpl } from "date-fns";
 import { LLMTool } from "./tool";
-import z from "zod";
+import z from "zod/v4";
 
 export const nextDayToolDefinition: FunctionDeclaration = {
     name: "next_day",

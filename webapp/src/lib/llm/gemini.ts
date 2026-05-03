@@ -3,7 +3,7 @@ import { Content, GoogleGenAI } from "@google/genai";
 import fs from "fs";
 import mustache from "mustache";
 import path from "path";
-import z from "zod";
+import z from "zod/v4";
 import { LOGGER } from "../logger";
 import { LLM, LLMSummary, LLMSummarySchema } from "./llm";
 import { addDaysTool, addDaysToolDefinition, nextDayTool, nextDayToolDefinition } from "./tools/date";

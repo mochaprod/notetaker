@@ -1,7 +1,7 @@
 "use client";
 
 import { Container } from "@/components/custom/container";
-import { formatDate } from "@/lib/llm/tools";
+import { formatDate } from "@/lib/date";
 import { Note } from "@common/types/notes";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { startOfDay } from "date-fns";
