@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParamsDate } from "@/hooks/use-search-params-date";
-import { formatDate } from "@/lib/llm/tools";
+import { formatDate } from "@/lib/date";
 import { addDays, isBefore, isSameDay } from "date-fns";
 import { useRouter } from "next/navigation";
 import React, { useCallback } from "react";

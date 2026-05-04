@@ -6,7 +6,7 @@ import { createEmptySlateDocument, DEFAULT_NOTEPAD_TITLE } from "@/lib/intake/de
 import { NotepadDocument, SaveNotepadDocumentSchema } from "@common/types/intake";
 import { headers } from "next/headers";
 
-export function createDefaultNotepadDocument(dateKey: string): NotepadDocument {
+export async function createDefaultNotepadDocument(dateKey: string): Promise<NotepadDocument> {
     return {
         id: null,
         dateKey,

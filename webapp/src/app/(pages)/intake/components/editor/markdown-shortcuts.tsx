@@ -9,16 +9,11 @@ import { installInsertBreakOverride } from "./overrides/insert-break";
 import { installInlineMarkdownMarkOverride } from "./overrides/insert-inline-marks";
 import { installInsertTextOverride } from "./overrides/insert-text";
 import { TopLevelBlock } from "./top-level-block";
-import type { ParagraphElement } from "./types";
 import { installNormalizeNode } from "./overrides/normalize-node";
 import clsx from "clsx";
+import { createEmptySlateDocument } from "@/lib/intake/default-document";
 
-const createParagraph = (): ParagraphElement => ({
-    type: "paragraph",
-    children: [{ text: "" }],
-});
-
-export const initialEditorValue: Descendant[] = [createParagraph()];
+export const initialEditorValue: Descendant[] = createEmptySlateDocument() as Descendant[];
 
 export function withMarkdownShortcuts<T extends Editor>(editor: T): T {
     const {

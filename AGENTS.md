@@ -72,3 +72,5 @@ From project root:
 
 ## Guidelines
 - IMPORTANT: Always ask for approval before making any code changes!
+- When changes are made to the database schema, DO NOT self create migrations
+manually. Use `yarn dlx prisma generate` to create it after editing `schema.prisma`.

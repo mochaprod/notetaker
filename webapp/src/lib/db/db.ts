@@ -1,4 +1,5 @@
 import { Note } from "@common/types/notes";
+import { NotepadDocument, SaveNotepadDocument } from "@common/types/intake";
 import { Summary } from "@common/types/summary";
 import { Todo, TodoData } from "@common/types/todo";
 import { AICredit } from "@common/types/user";
@@ -26,4 +27,9 @@ export interface TodoRepository {
     updateTodo: (userId: string, todoId: string, todo: TodoData) => Promise<void>;
     setTodoStatus: (userId: string, todoId: string, done: boolean) => Promise<void>;
     deleteTodo: (userId: string, todoId: string) => Promise<void>;
+}
+
+export interface NotepadRepository {
+    getByDate: (userId: string, dateKey: string) => Promise<NotepadDocument | null>;
+    saveByDate: (userId: string, input: SaveNotepadDocument) => Promise<NotepadDocument>;
 }
