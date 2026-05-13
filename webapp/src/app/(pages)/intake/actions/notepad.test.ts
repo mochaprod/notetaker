@@ -3,13 +3,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const {
     getSession,
     headersMock,
-    getByDateMock,
-    saveByDateMock,
+    getByDateKeyMock,
+    saveByDateKeyMock,
 } = vi.hoisted(() => ({
     getSession: vi.fn(),
     headersMock: vi.fn(async () => new Headers()),
-    getByDateMock: vi.fn(),
-    saveByDateMock: vi.fn(),
+    getByDateKeyMock: vi.fn(),
+    saveByDateKeyMock: vi.fn(),
 }));
 
 vi.mock("next/headers", () => ({
@@ -26,8 +26,8 @@ vi.mock("@/lib/auth", () => ({
 
 vi.mock("@/lib/db/db-instance", () => ({
     notepadRepository: {
-        getByDate: getByDateMock,
-        saveByDate: saveByDateMock,
+        getByDateKey: getByDateKeyMock,
+        saveByDateKey: saveByDateKeyMock,
     },
 }));
 
@@ -44,7 +44,7 @@ describe("notepad actions", () => {
         const result = await getNotepad("2026-05-03");
 
         expect(result).toBeNull();
-        expect(getByDateMock).not.toHaveBeenCalled();
+        expect(getByDateKeyMock).not.toHaveBeenCalled();
     });
 
     it("returns a default document when no daily notepad exists", async () => {
@@ -53,12 +53,12 @@ describe("notepad actions", () => {
                 id: "user-1",
             },
         });
-        getByDateMock.mockResolvedValue(null);
+        getByDateKeyMock.mockResolvedValue(null);
 
         const result = await getNotepad("2026-05-03");
 
         expect(headersMock).toHaveBeenCalled();
-        expect(getByDateMock).toHaveBeenCalledWith("user-1", "2026-05-03");
+        expect(getByDateKeyMock).toHaveBeenCalledWith("user-1", "2026-05-03");
         expect(result).toMatchObject({
             id: null,
             dateKey: "2026-05-03",
@@ -88,7 +88,7 @@ describe("notepad actions", () => {
                 },
             ],
         };
-        saveByDateMock.mockResolvedValue({
+        saveByDateKeyMock.mockResolvedValue({
             id: "notepad-1",
             ...payload,
             createdAt: new Date("2026-05-03T10:00:00.000Z"),
@@ -97,7 +97,7 @@ describe("notepad actions", () => {
 
         const result = await saveNotepad(payload);
 
-        expect(saveByDateMock).toHaveBeenCalledWith("user-1", payload);
+        expect(saveByDateKeyMock).toHaveBeenCalledWith("user-1", payload);
         expect(result?.id).toBe("notepad-1");
     });
 
@@ -116,6 +116,6 @@ describe("notepad actions", () => {
         });
 
         expect(result).toBeNull();
-        expect(saveByDateMock).not.toHaveBeenCalled();
+        expect(saveByDateKeyMock).not.toHaveBeenCalled();
     });
 });

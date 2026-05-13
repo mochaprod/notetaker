@@ -92,14 +92,23 @@ export const SlateDocumentSchema = z.array(SlateElementSchema).min(1);
 
 export type SlateDocument = z.infer<typeof SlateDocumentSchema>;
 
-export const NotepadDocumentSchema = z.object({
+export const PersistedNotepadDocumentSchema = z.object({
     id: z.string().nullable(),
-    dateKey: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
     title: z.string(),
     content: SlateDocumentSchema,
     createdAt: z.coerce.date().nullable(),
     updatedAt: z.coerce.date().nullable(),
 });
+
+export type PersistedNotepadDocument = z.infer<typeof PersistedNotepadDocumentSchema>;
+
+export const DailyNotepadDocumentSchema = PersistedNotepadDocumentSchema.extend({
+    dateKey: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+});
+
+export type DailyNotepadDocument = z.infer<typeof DailyNotepadDocumentSchema>;
+
+export const NotepadDocumentSchema = DailyNotepadDocumentSchema;
 
 export type NotepadDocument = z.infer<typeof NotepadDocumentSchema>;
 

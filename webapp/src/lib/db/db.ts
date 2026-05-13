@@ -30,6 +30,6 @@ export interface TodoRepository {
 }
 
 export interface NotepadRepository {
-    getByDate: (userId: string, dateKey: string) => Promise<NotepadDocument | null>;
-    saveByDate: (userId: string, input: SaveNotepadDocument) => Promise<NotepadDocument>;
+    getByDateKey: (userId: string, dateKey: string) => Promise<NotepadDocument | null>;
+    saveByDateKey: (userId: string, input: SaveNotepadDocument) => Promise<NotepadDocument>;
 }

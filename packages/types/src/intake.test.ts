@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { NotepadDocumentSchema, SaveNotepadDocumentSchema, SlateDocumentSchema } from "./intake";
+import {
+    DailyNotepadDocumentSchema,
+    NotepadDocumentSchema,
+    PersistedNotepadDocumentSchema,
+    SaveNotepadDocumentSchema,
+    SlateDocumentSchema,
+} from "./intake";
 
 describe("SlateDocumentSchema", () => {
     it("parses a valid Slate document", () => {
@@ -28,8 +34,25 @@ describe("SlateDocumentSchema", () => {
 });
 
 describe("notepad document schemas", () => {
-    it("parses persisted documents", () => {
-        const result = NotepadDocumentSchema.parse({
+    it("parses persisted notepads without daily identity", () => {
+        const result = PersistedNotepadDocumentSchema.parse({
+            id: "notepad-1",
+            title: "Untitled",
+            content: [
+                {
+                    type: "paragraph",
+                    children: [{ text: "" }],
+                },
+            ],
+            createdAt: "2026-05-03T10:00:00.000Z",
+            updatedAt: "2026-05-03T10:01:00.000Z",
+        });
+
+        expect(result.createdAt).toBeInstanceOf(Date);
+    });
+
+    it("parses daily notepad documents with a date key", () => {
+        const result = DailyNotepadDocumentSchema.parse({
             id: "notepad-1",
             dateKey: "2026-05-03",
             title: "Untitled",
@@ -43,7 +66,8 @@ describe("notepad document schemas", () => {
             updatedAt: "2026-05-03T10:01:00.000Z",
         });
 
-        expect(result.createdAt).toBeInstanceOf(Date);
+        expect(result.dateKey).toBe("2026-05-03");
+        expect(NotepadDocumentSchema.parse(result).dateKey).toBe("2026-05-03");
     });
 
     it("validates save payloads", () => {

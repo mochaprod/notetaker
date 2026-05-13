@@ -2,13 +2,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PostgresqlNotepadRepository } from "./notepad-repo";
 import type { SaveNotepadDocument } from "@common/types/intake";
 
-const notepadFindUnique = vi.fn();
-const notepadUpsert = vi.fn();
+const dailyNotepadFindUnique = vi.fn();
+const dailyNotepadUpsert = vi.fn();
 
 const prisma = {
-    notepad: {
-        findUnique: notepadFindUnique,
-        upsert: notepadUpsert,
+    dailyNotepad: {
+        findUnique: dailyNotepadFindUnique,
+        upsert: dailyNotepadUpsert,
     },
 };
 
@@ -17,39 +17,56 @@ describe("PostgresqlNotepadRepository", () => {
         vi.clearAllMocks();
     });
 
-    it("loads a notepad by user and date", async () => {
+    it("loads a daily notepad by user and date", async () => {
         const repo = new PostgresqlNotepadRepository(prisma as any);
-        notepadFindUnique.mockResolvedValue({
-            id: "notepad-1",
+        dailyNotepadFindUnique.mockResolvedValue({
             userId: "user-1",
             dateKey: "2026-05-03",
-            title: "Untitled",
-            content: [
-                {
-                    type: "paragraph",
-                    children: [{ text: "Existing note" }],
-                },
-            ],
-            createdAt: new Date("2026-05-03T10:00:00.000Z"),
-            updatedAt: new Date("2026-05-03T10:00:00.000Z"),
+            notepadId: "notepad-1",
+            notepad: {
+                id: "notepad-1",
+                userId: "user-1",
+                title: "Untitled",
+                content: [
+                    {
+                        type: "paragraph",
+                        children: [{ text: "Existing note" }],
+                    },
+                ],
+                createdAt: new Date("2026-05-03T10:00:00.000Z"),
+                updatedAt: new Date("2026-05-03T10:00:00.000Z"),
+            },
         });
 
-        const result = await repo.getByDate("user-1", "2026-05-03");
+        const result = await repo.getByDateKey("user-1", "2026-05-03");
 
-        expect(notepadFindUnique).toHaveBeenCalledWith({
+        expect(dailyNotepadFindUnique).toHaveBeenCalledWith({
             where: {
                 userId_dateKey: {
                     userId: "user-1",
                     dateKey: "2026-05-03",
                 },
             },
+            include: {
+                notepad: true,
+            },
         });
+        expect(result?.dateKey).toBe("2026-05-03");
         expect(result?.content[0]).toMatchObject({
             type: "paragraph",
         });
     });
 
-    it("upserts a notepad by user and date", async () => {
+    it("returns null when no daily notepad exists", async () => {
+        const repo = new PostgresqlNotepadRepository(prisma as any);
+        dailyNotepadFindUnique.mockResolvedValue(null);
+
+        const result = await repo.getByDateKey("user-1", "2026-05-03");
+
+        expect(result).toBeNull();
+    });
+
+    it("creates a general notepad and daily mapping on first daily save", async () => {
         const repo = new PostgresqlNotepadRepository(prisma as any);
         const input: SaveNotepadDocument = {
             dateKey: "2026-05-03",
@@ -61,17 +78,23 @@ describe("PostgresqlNotepadRepository", () => {
                 },
             ],
         };
-        notepadUpsert.mockResolvedValue({
-            id: "notepad-1",
+        dailyNotepadUpsert.mockResolvedValue({
             userId: "user-1",
-            ...input,
-            createdAt: new Date("2026-05-03T10:00:00.000Z"),
-            updatedAt: new Date("2026-05-03T10:00:00.000Z"),
+            dateKey: "2026-05-03",
+            notepadId: "notepad-1",
+            notepad: {
+                id: "notepad-1",
+                userId: "user-1",
+                title: input.title,
+                content: input.content,
+                createdAt: new Date("2026-05-03T10:00:00.000Z"),
+                updatedAt: new Date("2026-05-03T10:00:00.000Z"),
+            },
         });
 
-        const result = await repo.saveByDate("user-1", input);
+        const result = await repo.saveByDateKey("user-1", input);
 
-        expect(notepadUpsert).toHaveBeenCalledWith({
+        expect(dailyNotepadUpsert).toHaveBeenCalledWith({
             where: {
                 userId_dateKey: {
                     userId: "user-1",
@@ -79,16 +102,111 @@ describe("PostgresqlNotepadRepository", () => {
                 },
             },
             update: {
-                title: "Untitled",
-                content: input.content,
+                notepad: {
+                    update: {
+                        title: "Untitled",
+                        content: input.content,
+                    },
+                },
             },
             create: {
-                userId: "user-1",
                 dateKey: "2026-05-03",
-                title: "Untitled",
-                content: input.content,
+                notepad: {
+                    create: {
+                        title: "Untitled",
+                        content: input.content,
+                        user: {
+                            connect: {
+                                id: "user-1",
+                            },
+                        },
+                    },
+                },
+                user: {
+                    connect: {
+                        id: "user-1",
+                    },
+                },
+            },
+            include: {
+                notepad: true,
             },
         });
-        expect(result?.id).toBe("notepad-1");
+        expect(result).toMatchObject({
+            id: "notepad-1",
+            dateKey: "2026-05-03",
+        });
+    });
+
+    it("updates the mapped notepad on later daily saves", async () => {
+        const repo = new PostgresqlNotepadRepository(prisma as any);
+        const input: SaveNotepadDocument = {
+            dateKey: "2026-05-03",
+            title: "Renamed",
+            content: [
+                {
+                    type: "paragraph",
+                    children: [{ text: "Updated note" }],
+                },
+            ],
+        };
+        dailyNotepadUpsert.mockResolvedValue({
+            userId: "user-1",
+            dateKey: "2026-05-03",
+            notepadId: "notepad-1",
+            notepad: {
+                id: "notepad-1",
+                userId: "user-1",
+                title: input.title,
+                content: input.content,
+                createdAt: new Date("2026-05-03T10:00:00.000Z"),
+                updatedAt: new Date("2026-05-03T10:01:00.000Z"),
+            },
+        });
+
+        const result = await repo.saveByDateKey("user-1", input);
+
+        expect(dailyNotepadUpsert).toHaveBeenCalledWith({
+            where: {
+                userId_dateKey: {
+                    userId: "user-1",
+                    dateKey: "2026-05-03",
+                },
+            },
+            update: {
+                notepad: {
+                    update: {
+                        title: "Renamed",
+                        content: input.content,
+                    },
+                },
+            },
+            create: {
+                dateKey: "2026-05-03",
+                notepad: {
+                    create: {
+                        title: "Renamed",
+                        content: input.content,
+                        user: {
+                            connect: {
+                                id: "user-1",
+                            },
+                        },
+                    },
+                },
+                user: {
+                    connect: {
+                        id: "user-1",
+                    },
+                },
+            },
+            include: {
+                notepad: true,
+            },
+        });
+        expect(result).toMatchObject({
+            id: "notepad-1",
+            dateKey: "2026-05-03",
+        });
     });
 });

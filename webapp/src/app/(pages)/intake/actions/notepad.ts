@@ -26,7 +26,7 @@ export async function getNotepad(dateKey: string): Promise<NotepadDocument | nul
         return null;
     }
 
-    return await notepadRepository.getByDate(session.user.id, dateKey)
+    return await notepadRepository.getByDateKey(session.user.id, dateKey)
         ?? createDefaultNotepadDocument(dateKey);
 }
 
@@ -41,5 +41,5 @@ export async function saveNotepad(input: unknown): Promise<NotepadDocument | nul
 
     const parsedInput = SaveNotepadDocumentSchema.parse(input);
 
-    return await notepadRepository.saveByDate(session.user.id, parsedInput);
+    return await notepadRepository.saveByDateKey(session.user.id, parsedInput);
 }
