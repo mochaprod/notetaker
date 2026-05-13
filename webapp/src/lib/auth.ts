@@ -8,6 +8,7 @@ export const auth = betterAuth({
             enabled: true,
             strategy: "jwe",
             refreshCache: true,
+            maxAge: 604800, // 1 week
         },
     },
     account: {
