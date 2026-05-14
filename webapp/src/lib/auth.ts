@@ -1,13 +1,16 @@
 import { betterAuth } from "better-auth";
+import { prismaAdapter } from "better-auth/adapters/prisma";
 import { credentialsAuth } from "@/lib/auth/credentials-plugin";
-import { persistSocialAccount } from "@/lib/auth/social-account-persistence";
+import { prisma } from "@db/prisma";
 
 export const auth = betterAuth({
+    database: prismaAdapter(prisma, {
+        provider: "postgresql",
+    }),
     session: {
         cookieCache: {
             enabled: true,
             strategy: "jwe",
-            refreshCache: true,
             maxAge: 604800, // 1 week
         },
     },
@@ -20,7 +23,6 @@ export const auth = betterAuth({
     },
     plugins: [
         credentialsAuth(),
-        persistSocialAccount("google"),
     ],
     socialProviders: {
         google: {

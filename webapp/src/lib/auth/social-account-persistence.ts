@@ -70,7 +70,7 @@ function toDate(value?: string | Date) {
 }
 
 async function readStoredAccount(ctx: HookContext): Promise<ReturnType<typeof getAccountCookie>> {
-    return await getAccountCookie(ctx);
+    return getAccountCookie(ctx);
 }
 
 function createSocialPersistenceError(message: string) {
@@ -108,6 +108,7 @@ export async function persistSocialAccountData(ctx: HookContext, providerKey?: s
     }
 
     const storedAccount = await readStoredAccount(ctx);
+    console.log(sessionUser, storedAccount);
 
     if (!storedAccount?.providerId || !storedAccount.accountId) {
         throw createSocialPersistenceError("Social account data was missing from the callback.");
@@ -118,6 +119,7 @@ export async function persistSocialAccountData(ctx: HookContext, providerKey?: s
     let persistedResult: PersistedSocialAccount;
 
     try {
+        console.log("trying to persist");
         persistedResult = await prisma.$transaction(async (tx) => {
             const user = await tx.user.upsert({
                 where: {
