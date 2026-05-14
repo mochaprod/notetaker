@@ -5,9 +5,10 @@ import { formatDate } from "@/lib/date";
 import { createEmptySlateDocument, DEFAULT_NOTEPAD_TITLE } from "@/lib/intake/default-document";
 import type { NotepadDocument, SlateDocument } from "@common/types/intake";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import { createEditor, type Descendant } from "slate";
-import { Editable, Slate, withReact } from "slate-react";
+import type { MouseEvent } from "react";
+import { useCallback, useState } from "react";
+import { createEditor, Editor, Transforms, type Descendant } from "slate";
+import { Editable, ReactEditor, Slate, withReact } from "slate-react";
 import { useDebouncedCallback } from "use-debounce";
 import { getNotepad, saveNotepad } from "../actions/notepad";
 import { createKeyDownHandler } from "./editor/key-down-handler";
@@ -79,9 +80,28 @@ function NotepadEditor({
     const debouncedSave = useDebouncedCallback((content: SlateDocument) => {
         onSave(content);
     }, 750);
+    const handleSectionMouseDown = useCallback((event: MouseEvent<HTMLElement>) => {
+        const target = event.target;
+
+        if (!(target instanceof Element) || target.closest("[data-slate-editor='true']")) {
+            return;
+        }
+
+        event.preventDefault();
+
+        if (ReactEditor.isFocused(editor)) {
+            ReactEditor.blur(editor);
+        } else {
+            Transforms.select(editor, Editor.end(editor, []));
+            ReactEditor.focus(editor);
+        }
+    }, [editor]);
 
     return (
-        <section className="flex h-full flex-col border-neutral-200/80 bg-white/80 p-6 backdrop-blur-sm dark:border-white/10 dark:bg-white/10">
+        <section
+            className="flex h-full flex-col border-neutral-200/80 bg-white/80 p-6 backdrop-blur-sm dark:border-white/10 dark:bg-white/10"
+            onMouseDown={ handleSectionMouseDown }
+        >
             <div
                 className="w-1/2 mt-10 mx-auto"
             >
