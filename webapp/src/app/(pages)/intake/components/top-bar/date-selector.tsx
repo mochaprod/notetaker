@@ -11,7 +11,7 @@ import { CalendarIcon, ChevronDownIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 
-export function IntakeDateSelector() {
+export function DateSelector() {
     const router = useRouter();
     const now = useNow();
     const [currentDate] = useSearchParamsDate();

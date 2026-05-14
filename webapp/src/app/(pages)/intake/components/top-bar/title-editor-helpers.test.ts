@@ -3,9 +3,9 @@ import {
     getEditableTitle,
     getSaveDocument,
     normalizeTitle,
-} from "./intake-title-editor-helpers";
+} from "./title-editor-helpers";
 
-describe("intake title editor helpers", () => {
+describe("title editor helpers", () => {
     it("uses the persisted document title when one exists", () => {
         expect(getEditableTitle({
             id: "notepad-1",

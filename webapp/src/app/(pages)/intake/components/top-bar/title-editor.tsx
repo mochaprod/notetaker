@@ -3,19 +3,19 @@
 import { Input } from "@/components/ui/input";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { getNotepad, saveNotepad } from "../actions/notepad";
+import { getNotepad, saveNotepad } from "../../actions/notepad";
 import {
     getEditableTitle,
     getSaveDocument,
     normalizeTitle,
-} from "./intake-title-editor-helpers";
-import { notepadQueryKey } from "./notepad-query";
+} from "./title-editor-helpers";
+import { notepadQueryKey } from "../notepad-query";
 
-type IntakeTitleEditorProps = {
+type TitleEditorProps = {
     dateKey: string;
 };
 
-export function IntakeTitleEditor({ dateKey }: IntakeTitleEditorProps) {
+export function TitleEditor({ dateKey }: TitleEditorProps) {
     const [isEditing, setIsEditing] = useState(false);
     const queryClient = useQueryClient();
     const queryKey = notepadQueryKey(dateKey);
