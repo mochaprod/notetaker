@@ -35,7 +35,7 @@ export function DateSelector() {
                 </Button>
             </PopoverTrigger>
             <PopoverContent
-                align="start"
+                align="end"
                 className="w-auto overflow-hidden p-0"
             >
                 <div className="flex gap-1 p-3">

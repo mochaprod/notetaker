@@ -9,7 +9,9 @@ import type { SaveStatus } from "./status-bar/save-status-label";
 
 export function NotepadPanel() {
     const [saveStatus, setSaveStatus] = useState<SaveStatus>({
+        hasError: false,
         isLoading: true,
+        loadingState: "initial-load",
         lastSavedAt: null,
     });
 
@@ -19,7 +21,9 @@ export function NotepadPanel() {
                 <Notepad onSaveStatusChange={ setSaveStatus } />
             </div>
             <SaveStatusBar
+                hasError={ saveStatus.hasError }
                 isLoading={ saveStatus.isLoading }
+                loadingState={ saveStatus.loadingState }
                 lastSavedAt={ saveStatus.lastSavedAt }
             />
         </div>

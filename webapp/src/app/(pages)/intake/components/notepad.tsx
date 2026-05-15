@@ -57,6 +57,7 @@ export function Notepad({ onSaveStatusChange }: NotepadProps) {
         (savedDocument) => {
             if (!savedDocument) {
                 onSaveStatusChange?.({
+                    hasError: false,
                     isLoading: false,
                     lastSavedAt: lastSavedAtRef.current,
                 });
@@ -67,12 +68,14 @@ export function Notepad({ onSaveStatusChange }: NotepadProps) {
             lastSavedAtRef.current = lastSavedAt;
             queryClient.setQueryData(notepadQueryKey(savedDocument.dateKey), savedDocument);
             onSaveStatusChange?.({
+                hasError: false,
                 isLoading: false,
                 lastSavedAt,
             });
         },
         () => {
             onSaveStatusChange?.({
+                hasError: true,
                 isLoading: false,
                 lastSavedAt: lastSavedAtRef.current,
             });
@@ -82,7 +85,9 @@ export function Notepad({ onSaveStatusChange }: NotepadProps) {
     useEffect(() => {
         if (isPending) {
             onSaveStatusChange?.({
+                hasError: false,
                 isLoading: true,
+                loadingState: "initial-load",
                 lastSavedAt: lastSavedAtRef.current,
             });
             return;
@@ -90,6 +95,7 @@ export function Notepad({ onSaveStatusChange }: NotepadProps) {
 
         if (isError) {
             onSaveStatusChange?.({
+                hasError: true,
                 isLoading: false,
                 lastSavedAt: lastSavedAtRef.current,
             });
@@ -99,6 +105,7 @@ export function Notepad({ onSaveStatusChange }: NotepadProps) {
         const lastSavedAt = document?.updatedAt ?? null;
         lastSavedAtRef.current = lastSavedAt;
         onSaveStatusChange?.({
+            hasError: false,
             isLoading: false,
             lastSavedAt,
         });
@@ -143,7 +150,9 @@ export function Notepad({ onSaveStatusChange }: NotepadProps) {
             document={ notepadDocument }
             onSave={ (content) => {
                 onSaveStatusChange?.({
+                    hasError: false,
                     isLoading: true,
+                    loadingState: "saving",
                     lastSavedAt: lastSavedAtRef.current,
                 });
                 saveNotepadMutation.mutate({
@@ -187,7 +196,7 @@ function NotepadEditor({
             onMouseDown={ handleSectionMouseDown }
         >
             <div
-                className="w-1/2 mt-10 mx-auto"
+                className="w-1/2 max-w-200 mt-10 mx-auto"
             >
                 <Slate
                     editor={ editor }
@@ -206,7 +215,7 @@ function NotepadEditor({
                         placeholder="Start writing..."
                         renderElement={ renderMarkdownElement }
                         renderLeaf={ renderMarkdownLeaf }
-                        className="min-h-full w-full bg-transparent text-lg leading-6 text-neutral-900 caret-neutral-950 outline-none selection:bg-neutral-900/15 selection:text-neutral-950 [&_[data-slate-placeholder='true']]:text-neutral-400 dark:text-neutral-100 dark:caret-white dark:selection:bg-white/20 dark:selection:text-white dark:[&_[data-slate-placeholder='true']]:text-neutral-500"
+                        className="min-h-full w-full bg-transparent text-lg leading-6 text-neutral-900 caret-neutral-950 outline-none selection:bg-neutral-900/15 selection:text-neutral-950 [&_[data-slate-placeholder='true']]:!top-1/2 [&_[data-slate-placeholder='true']]:!-translate-y-1/2 [&_[data-slate-placeholder='true']]:text-neutral-400 dark:text-neutral-100 dark:caret-white dark:selection:bg-white/20 dark:selection:text-white dark:[&_[data-slate-placeholder='true']]:text-neutral-500"
                         onKeyDown={ createKeyDownHandler(editor) }
                     />
                 </Slate>
