@@ -6,7 +6,7 @@ import { createEmptySlateDocument, DEFAULT_NOTEPAD_TITLE } from "@/lib/intake/de
 import type { NotepadDocument, SlateDocument } from "@common/types/intake";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { MouseEvent } from "react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createEditor, Editor, Transforms, type Descendant } from "slate";
 import { Editable, ReactEditor, Slate, withReact } from "slate-react";
 import { toast } from "sonner";
@@ -23,15 +23,21 @@ import {
 } from "./notepad-save";
 import { formatLoadNotepadErrorMessage } from "./notepad-load";
 import { notepadQueryKey } from "./notepad-query";
+import type { SaveStatus } from "./status-bar/save-status-label";
 
 type NotepadEditorProps = {
     document: NotepadDocument;
 };
 
-export function Notepad() {
+type NotepadProps = {
+    onSaveStatusChange?: (status: SaveStatus) => void;
+};
+
+export function Notepad({ onSaveStatusChange }: NotepadProps) {
     const [currentDate] = useSearchParamsDate();
     const dateKey = formatDate(currentDate);
     const queryClient = useQueryClient();
+    const lastSavedAtRef = useRef<Date | null>(null);
 
     const {
         data: document,
@@ -50,12 +56,53 @@ export function Notepad() {
         toast.error,
         (savedDocument) => {
             if (!savedDocument) {
+                onSaveStatusChange?.({
+                    isLoading: false,
+                    lastSavedAt: lastSavedAtRef.current,
+                });
                 return;
             }
 
+            const lastSavedAt = savedDocument.updatedAt ?? new Date();
+            lastSavedAtRef.current = lastSavedAt;
             queryClient.setQueryData(notepadQueryKey(savedDocument.dateKey), savedDocument);
+            onSaveStatusChange?.({
+                isLoading: false,
+                lastSavedAt,
+            });
+        },
+        () => {
+            onSaveStatusChange?.({
+                isLoading: false,
+                lastSavedAt: lastSavedAtRef.current,
+            });
         },
     ));
+
+    useEffect(() => {
+        if (isPending) {
+            onSaveStatusChange?.({
+                isLoading: true,
+                lastSavedAt: lastSavedAtRef.current,
+            });
+            return;
+        }
+
+        if (isError) {
+            onSaveStatusChange?.({
+                isLoading: false,
+                lastSavedAt: lastSavedAtRef.current,
+            });
+            return;
+        }
+
+        const lastSavedAt = document?.updatedAt ?? null;
+        lastSavedAtRef.current = lastSavedAt;
+        onSaveStatusChange?.({
+            isLoading: false,
+            lastSavedAt,
+        });
+    }, [document, isError, isPending, onSaveStatusChange]);
 
     if (isPending) {
         return (
@@ -94,11 +141,17 @@ export function Notepad() {
         <NotepadEditor
             key={ notepadDocument.dateKey }
             document={ notepadDocument }
-            onSave={ (content) => saveNotepadMutation.mutate({
-                dateKey: notepadDocument.dateKey,
-                title: notepadDocument.title,
-                content,
-            }) }
+            onSave={ (content) => {
+                onSaveStatusChange?.({
+                    isLoading: true,
+                    lastSavedAt: lastSavedAtRef.current,
+                });
+                saveNotepadMutation.mutate({
+                    dateKey: notepadDocument.dateKey,
+                    title: notepadDocument.title,
+                    content,
+                });
+            } }
         />
     );
 }

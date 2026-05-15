@@ -23,6 +23,7 @@ export function createSaveNotepadMutationOptions(
     saveNotepad: SaveNotepad,
     showError: ShowSaveError,
     onSuccess: (savedDocument: NotepadDocument | null) => void,
+    onError?: (error: unknown) => void,
 ) {
     return {
         mutationFn: createSaveNotepadMutationFn(saveNotepad),
@@ -31,6 +32,7 @@ export function createSaveNotepadMutationOptions(
         onSuccess,
         onError: (error: unknown) => {
             showError(formatSaveNotepadErrorMessage(error));
+            onError?.(error);
         },
     };
 }
