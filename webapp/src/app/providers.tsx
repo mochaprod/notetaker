@@ -16,6 +16,7 @@ export function Providers({ children }: PropsWithChildren) {
                 { children }
             </QueryClientProvider>
             <Toaster
+                richColors
                 closeButton
             />
         </ThemeProvider>

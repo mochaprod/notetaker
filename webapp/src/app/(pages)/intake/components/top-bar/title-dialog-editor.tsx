@@ -12,7 +12,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { getNotepad, saveNotepad } from "../../actions/notepad";
+import { createSaveNotepadMutationOptions } from "../notepad-save";
 import {
     getEditableTitle,
     getSaveDocument,
@@ -28,11 +30,11 @@ export function TitleDialogEditor({ dateKey }: TitleDialogEditorProps) {
     const [isOpen, setIsOpen] = useState(false);
     const queryClient = useQueryClient();
     const queryKey = notepadQueryKey(dateKey);
-    const { data: document } = useQuery({
+    const { data: document, isError } = useQuery({
         queryKey,
         queryFn: () => getNotepad(dateKey),
     });
-    const title = getEditableTitle(document);
+    const title = isError ? "Failed to load title" : getEditableTitle(document);
     const [draftTitle, setDraftTitle] = useState(title);
 
     useEffect(() => {
@@ -41,9 +43,10 @@ export function TitleDialogEditor({ dateKey }: TitleDialogEditorProps) {
         }
     }, [isOpen, title]);
 
-    const saveTitleMutation = useMutation({
-        mutationFn: saveNotepad,
-        onSuccess: (savedDocument) => {
+    const saveTitleMutation = useMutation(createSaveNotepadMutationOptions(
+        saveNotepad,
+        toast.error,
+        (savedDocument) => {
             if (!savedDocument) {
                 return;
             }
@@ -51,7 +54,15 @@ export function TitleDialogEditor({ dateKey }: TitleDialogEditorProps) {
             queryClient.setQueryData(notepadQueryKey(savedDocument.dateKey), savedDocument);
             setIsOpen(false);
         },
-    });
+    ));
+
+    if (isError) {
+        return (
+            <span className="min-w-0 truncate rounded-md px-2 py-1 text-left text-sm font-semibold text-neutral-500 dark:text-neutral-400">
+                { title }
+            </span>
+        );
+    }
 
     return (
         <Dialog

@@ -3,7 +3,9 @@
 import { Input } from "@/components/ui/input";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { getNotepad, saveNotepad } from "../../actions/notepad";
+import { createSaveNotepadMutationOptions } from "../notepad-save";
 import {
     getEditableTitle,
     getSaveDocument,
@@ -19,11 +21,11 @@ export function TitleEditor({ dateKey }: TitleEditorProps) {
     const [isEditing, setIsEditing] = useState(false);
     const queryClient = useQueryClient();
     const queryKey = notepadQueryKey(dateKey);
-    const { data: document } = useQuery({
+    const { data: document, isError } = useQuery({
         queryKey,
         queryFn: () => getNotepad(dateKey),
     });
-    const title = getEditableTitle(document);
+    const title = isError ? "Failed to load title" : getEditableTitle(document);
     const [draftTitle, setDraftTitle] = useState(title);
     const skipNextBlurSaveRef = useRef(false);
 
@@ -33,9 +35,10 @@ export function TitleEditor({ dateKey }: TitleEditorProps) {
         }
     }, [isEditing, title]);
 
-    const saveTitleMutation = useMutation({
-        mutationFn: saveNotepad,
-        onSuccess: (savedDocument) => {
+    const saveTitleMutation = useMutation(createSaveNotepadMutationOptions(
+        saveNotepad,
+        toast.error,
+        (savedDocument) => {
             if (!savedDocument) {
                 return;
             }
@@ -43,7 +46,7 @@ export function TitleEditor({ dateKey }: TitleEditorProps) {
             queryClient.setQueryData(notepadQueryKey(savedDocument.dateKey), savedDocument);
             setIsEditing(false);
         },
-    });
+    ));
 
     function startEditing() {
         skipNextBlurSaveRef.current = false;
@@ -58,6 +61,10 @@ export function TitleEditor({ dateKey }: TitleEditorProps) {
     }
 
     function saveTitle() {
+        if (isError) {
+            return;
+        }
+
         const normalizedTitle = normalizeTitle(draftTitle);
 
         if (normalizedTitle === title) {
@@ -72,6 +79,14 @@ export function TitleEditor({ dateKey }: TitleEditorProps) {
             title: normalizedTitle,
             content: saveDocument.content,
         });
+    }
+
+    if (isError) {
+        return (
+            <span className="min-w-0 truncate rounded-md px-2 py-1 text-left text-sm font-semibold text-neutral-500 dark:text-neutral-400">
+                { title }
+            </span>
+        );
     }
 
     if (isEditing) {

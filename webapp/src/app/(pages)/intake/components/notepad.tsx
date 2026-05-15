@@ -9,6 +9,7 @@ import type { MouseEvent } from "react";
 import { useCallback, useState } from "react";
 import { createEditor, Editor, Transforms, type Descendant } from "slate";
 import { Editable, ReactEditor, Slate, withReact } from "slate-react";
+import { toast } from "sonner";
 import { useDebouncedCallback } from "use-debounce";
 import { getNotepad, saveNotepad } from "../actions/notepad";
 import { createKeyDownHandler } from "./editor/key-down-handler";
@@ -17,6 +18,10 @@ import {
     renderMarkdownLeaf,
     withMarkdownShortcuts,
 } from "./editor/markdown-shortcuts";
+import {
+    createSaveNotepadMutationOptions,
+} from "./notepad-save";
+import { formatLoadNotepadErrorMessage } from "./notepad-load";
 import { notepadQueryKey } from "./notepad-query";
 
 type NotepadEditorProps = {
@@ -28,25 +33,51 @@ export function Notepad() {
     const dateKey = formatDate(currentDate);
     const queryClient = useQueryClient();
 
-    const { data: document, isPending } = useQuery({
+    const {
+        data: document,
+        error,
+        isError,
+        isFetching,
+        isPending,
+        refetch,
+    } = useQuery({
         queryKey: notepadQueryKey(dateKey),
         queryFn: () => getNotepad(dateKey),
     });
 
-    const saveNotepadMutation = useMutation({
-        mutationFn: saveNotepad,
-        onSuccess: (savedDocument) => {
+    const saveNotepadMutation = useMutation(createSaveNotepadMutationOptions(
+        saveNotepad,
+        toast.error,
+        (savedDocument) => {
             if (!savedDocument) {
                 return;
             }
 
             queryClient.setQueryData(notepadQueryKey(savedDocument.dateKey), savedDocument);
         },
-    });
+    ));
 
     if (isPending) {
         return (
             <section className="flex h-full flex-col border-neutral-200/80 bg-white/80 p-6 backdrop-blur-sm dark:border-white/10 dark:bg-white/10" />
+        );
+    }
+
+    if (isError) {
+        return (
+            <section className="flex h-full flex-col items-center justify-center gap-3 border-neutral-200/80 bg-white/80 p-6 text-center backdrop-blur-sm dark:border-white/10 dark:bg-white/10">
+                <p className="max-w-md whitespace-pre-wrap text-sm text-neutral-700 dark:text-neutral-300">
+                    { formatLoadNotepadErrorMessage(error) }
+                </p>
+                <button
+                    type="button"
+                    className="rounded-md border border-neutral-300 px-3 py-1.5 text-sm font-medium text-neutral-900 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/20 dark:text-neutral-100 dark:hover:bg-white/10"
+                    disabled={ isFetching }
+                    onClick={ () => void refetch() }
+                >
+                    Retry
+                </button>
+            </section>
         );
     }
 
