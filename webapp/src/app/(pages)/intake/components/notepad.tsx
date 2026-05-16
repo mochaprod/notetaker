@@ -5,6 +5,7 @@ import { formatDate } from "@/lib/date";
 import { createEmptySlateDocument, DEFAULT_NOTEPAD_TITLE } from "@/lib/intake/default-document";
 import type { NotepadDocument, SlateDocument } from "@common/types/intake";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import clsx from "clsx";
 import type { MouseEvent } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createEditor, Editor, Transforms, type Descendant } from "slate";
@@ -215,7 +216,13 @@ function NotepadEditor({
                         placeholder="Start writing..."
                         renderElement={ renderMarkdownElement }
                         renderLeaf={ renderMarkdownLeaf }
-                        className="min-h-full w-full bg-transparent text-lg leading-6 text-neutral-900 caret-neutral-950 outline-none selection:bg-neutral-900/15 selection:text-neutral-950 [&_[data-slate-placeholder='true']]:!top-1/2 [&_[data-slate-placeholder='true']]:!-translate-y-1/2 [&_[data-slate-placeholder='true']]:text-neutral-400 dark:text-neutral-100 dark:caret-white dark:selection:bg-white/20 dark:selection:text-white dark:[&_[data-slate-placeholder='true']]:text-neutral-500"
+                        className={clsx(
+                            "min-h-full w-full bg-transparent text-lg leading-6 outline-none",
+                            "text-neutral-900 caret-neutral-950 selection:bg-neutral-900/15 selection:text-neutral-950",
+                            "dark:text-neutral-100 dark:caret-white dark:selection:bg-white/20 dark:selection:text-white",
+                            "**:data-[slate-placeholder=true]:top-1/2! **:data-[slate-placeholder=true]:-translate-y-1/2!",
+                            "**:data-[slate-placeholder=true]:text-neutral-400 dark:**:data-[slate-placeholder=true]:text-neutral-500",
+                        )}
                         onKeyDown={ createKeyDownHandler(editor) }
                     />
                 </Slate>

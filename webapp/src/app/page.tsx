@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Cormorant_Garamond } from "next/font/google";
+import { withAuth } from "@/components/with-auth";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,7 +11,7 @@ const headlineFont = Cormorant_Garamond({
     weight: ["500", "600", "700"],
 });
 
-export default function Home() {
+function Home() {
     const features = [
         {
             title: "Write before you organize",
@@ -328,3 +329,5 @@ export default function Home() {
         </main>
     );
 }
+
+export default withAuth(Home, { redirectTo: "/intake", invert: true });

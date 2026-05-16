@@ -39,6 +39,7 @@ export function TopLevelBlock({ attributes, children, element }: TopLevelBlockPr
                 "relative px-1.5 py-1 rounded-md transition-colors",
                 "hover:bg-neutral-100 dark:hover:bg-neutral-100",
                 isActive && "border-neutral-300 bg-neutral-950/4 dark:border-white/15 dark:bg-white/6",
+                "dark:hover:bg-white/20",
             )}
         >
             { children }
