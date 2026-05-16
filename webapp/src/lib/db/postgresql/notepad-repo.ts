@@ -1,4 +1,4 @@
-import { NotepadDocumentSchema, SaveNotepadDocument, SlateDocumentSchema } from "@common/types/intake";
+import { NotepadDocumentSchema, SaveNotepadByIdDocument, SaveNotepadDocument, SlateDocumentSchema } from "@common/types/intake";
 import { NotepadRepository } from "../db";
 import { Prisma, PrismaClient } from "@db/prisma";
 
@@ -26,6 +26,27 @@ export class PostgresqlNotepadRepository implements NotepadRepository {
         return NotepadDocumentSchema.parse({
             ...dailyNotepad.notepad,
             dateKey: dailyNotepad.dateKey,
+        });
+    }
+
+    async getById(userId: string, notepadId: string) {
+        const notepad = await this.prisma.notepad.findFirst({
+            where: {
+                id: notepadId,
+                userId,
+            },
+            include: {
+                daily: true,
+            },
+        });
+
+        if (!notepad) {
+            return null;
+        }
+
+        return NotepadDocumentSchema.parse({
+            ...notepad,
+            dateKey: notepad.daily?.dateKey ?? null,
         });
     }
 
@@ -74,6 +95,29 @@ export class PostgresqlNotepadRepository implements NotepadRepository {
         return NotepadDocumentSchema.parse({
             ...dailyNotepad.notepad,
             dateKey: dailyNotepad.dateKey,
+        });
+    }
+
+    async saveById(userId: string, input: SaveNotepadByIdDocument) {
+        const content = SlateDocumentSchema.parse(input.content) as Prisma.JsonArray;
+
+        const notepad = await this.prisma.notepad.update({
+            where: {
+                id: input.notepadId,
+                userId,
+            },
+            data: {
+                title: input.title,
+                content,
+            },
+            include: {
+                daily: true,
+            },
+        });
+
+        return NotepadDocumentSchema.parse({
+            ...notepad,
+            dateKey: notepad.daily?.dateKey ?? null,
         });
     }
 }

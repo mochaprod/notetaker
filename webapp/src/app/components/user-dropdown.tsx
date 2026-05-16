@@ -5,9 +5,11 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem,
 import { SidebarMenuButton } from "@/components/ui/sidebar";
 import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 export function UserDropdown() {
+    const router = useRouter();
     const session = authClient.useSession();
 
     const isSessionPending = !session || session.isPending || session.isRefetching;
@@ -16,6 +18,7 @@ export function UserDropdown() {
     const signOut = async () => {
         await authClient.signOut();
         toast.success("Signed out successfully.", { position: "top-right" });
+        router.replace("/");
     };
 
     const renderDropdownContent = () => {

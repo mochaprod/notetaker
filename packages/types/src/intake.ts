@@ -108,14 +108,25 @@ export const DailyNotepadDocumentSchema = PersistedNotepadDocumentSchema.extend(
 
 export type DailyNotepadDocument = z.infer<typeof DailyNotepadDocumentSchema>;
 
-export const NotepadDocumentSchema = DailyNotepadDocumentSchema;
+export const NotepadDocumentSchema = PersistedNotepadDocumentSchema.extend({
+    dateKey: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+});
 
 export type NotepadDocument = z.infer<typeof NotepadDocumentSchema>;
 
-export const SaveNotepadDocumentSchema = NotepadDocumentSchema.pick({
+export const SaveNotepadDocumentSchema = DailyNotepadDocumentSchema.pick({
     dateKey: true,
     title: true,
     content: true,
 });
 
 export type SaveNotepadDocument = z.infer<typeof SaveNotepadDocumentSchema>;
+
+export const SaveNotepadByIdDocumentSchema = PersistedNotepadDocumentSchema.pick({
+    title: true,
+    content: true,
+}).extend({
+    notepadId: z.string().min(1),
+});
+
+export type SaveNotepadByIdDocument = z.infer<typeof SaveNotepadByIdDocumentSchema>;

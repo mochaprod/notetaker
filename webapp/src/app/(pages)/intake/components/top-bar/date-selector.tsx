@@ -4,22 +4,28 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useNow } from "@/hooks/use-now";
-import { useSearchParamsDate } from "@/hooks/use-search-params-date";
 import { formatDate, formatDateLabel } from "@/lib/date";
 import { isBefore, isSameDay, subDays } from "date-fns";
 import { CalendarIcon, ChevronDownIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
+import type { NotepadReference } from "../notepad-reference";
 
-export function DateSelector() {
+type DateSelectorProps = {
+    notepadReference: NotepadReference;
+};
+
+export function DateSelector({ notepadReference }: DateSelectorProps) {
     const router = useRouter();
     const now = useNow();
-    const [currentDate] = useSearchParamsDate();
     const today = now.data;
+    const currentDate = notepadReference.kind === "date"
+        ? new Date(`${notepadReference.dateKey}T00:00:00`)
+        : today;
 
     const selectDate = useCallback((date: Date) => {
         const dateToSet = isBefore(date, today) || isSameDay(date, today) ? date : currentDate;
-        router.push(`?date=${formatDate(dateToSet)}`);
+        router.push(`/intake/date/${formatDate(dateToSet)}`);
     }, [currentDate, router, today]);
 
     return (

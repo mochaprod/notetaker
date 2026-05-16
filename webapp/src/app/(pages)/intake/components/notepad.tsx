@@ -1,7 +1,5 @@
 "use client";
 
-import { useSearchParamsDate } from "@/hooks/use-search-params-date";
-import { formatDate } from "@/lib/date";
 import { createEmptySlateDocument, DEFAULT_NOTEPAD_TITLE } from "@/lib/intake/default-document";
 import type { NotepadDocument, SlateDocument } from "@common/types/intake";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -12,7 +10,7 @@ import { createEditor, Editor, Transforms, type Descendant } from "slate";
 import { Editable, ReactEditor, Slate, withReact } from "slate-react";
 import { toast } from "sonner";
 import { useDebouncedCallback } from "use-debounce";
-import { getNotepad, saveNotepad } from "../actions/notepad";
+import { getDailyNotepad, getNotepadById, saveDailyNotepad, saveNotepadById } from "../actions/notepad";
 import { createKeyDownHandler } from "./editor/key-down-handler";
 import {
     renderMarkdownElement,
@@ -24,6 +22,7 @@ import {
 } from "./notepad-save";
 import { formatLoadNotepadErrorMessage } from "./notepad-load";
 import { notepadQueryKey } from "./notepad-query";
+import type { NotepadReference } from "./notepad-reference";
 import type { SaveStatus } from "./status-bar/save-status-label";
 
 type NotepadEditorProps = {
@@ -31,14 +30,14 @@ type NotepadEditorProps = {
 };
 
 type NotepadProps = {
+    notepadReference: NotepadReference;
     onSaveStatusChange?: (status: SaveStatus) => void;
 };
 
-export function Notepad({ onSaveStatusChange }: NotepadProps) {
-    const [currentDate] = useSearchParamsDate();
-    const dateKey = formatDate(currentDate);
+export function Notepad({ notepadReference, onSaveStatusChange }: NotepadProps) {
     const queryClient = useQueryClient();
     const lastSavedAtRef = useRef<Date | null>(null);
+    const queryKey = notepadQueryKey(notepadReference);
 
     const {
         data: document,
@@ -48,12 +47,16 @@ export function Notepad({ onSaveStatusChange }: NotepadProps) {
         isPending,
         refetch,
     } = useQuery({
-        queryKey: notepadQueryKey(dateKey),
-        queryFn: () => getNotepad(dateKey),
+        queryKey,
+        queryFn: () => notepadReference.kind === "date"
+            ? getDailyNotepad(notepadReference.dateKey)
+            : getNotepadById(notepadReference.notepadId),
     });
 
     const saveNotepadMutation = useMutation(createSaveNotepadMutationOptions(
-        saveNotepad,
+        (payload) => notepadReference.kind === "date"
+            ? saveDailyNotepad(payload)
+            : saveNotepadById(payload),
         toast.error,
         (savedDocument) => {
             if (!savedDocument) {
@@ -67,7 +70,7 @@ export function Notepad({ onSaveStatusChange }: NotepadProps) {
 
             const lastSavedAt = savedDocument.updatedAt ?? new Date();
             lastSavedAtRef.current = lastSavedAt;
-            queryClient.setQueryData(notepadQueryKey(savedDocument.dateKey), savedDocument);
+            queryClient.setQueryData(queryKey, savedDocument);
             onSaveStatusChange?.({
                 hasError: false,
                 isLoading: false,
@@ -136,9 +139,22 @@ export function Notepad({ onSaveStatusChange }: NotepadProps) {
         );
     }
 
+    if (!document && notepadReference.kind === "notepad") {
+        return (
+            <section className="flex h-full flex-col items-center justify-center gap-3 border-neutral-200/80 bg-white/80 p-6 text-center backdrop-blur-sm dark:border-white/10 dark:bg-white/10">
+                <p className="max-w-md whitespace-pre-wrap text-sm text-neutral-700 dark:text-neutral-300">
+                    { formatLoadNotepadErrorMessage(new Error("Notepad not found")) }
+                </p>
+            </section>
+        );
+    }
+
+    const documentKey = notepadReference.kind === "date"
+        ? notepadReference.dateKey
+        : notepadReference.notepadId;
     const notepadDocument = document ?? {
         id: null,
-        dateKey,
+        dateKey: notepadReference.kind === "date" ? notepadReference.dateKey : null,
         title: DEFAULT_NOTEPAD_TITLE,
         content: createEmptySlateDocument(),
         createdAt: null,
@@ -147,7 +163,7 @@ export function Notepad({ onSaveStatusChange }: NotepadProps) {
 
     return (
         <NotepadEditor
-            key={ notepadDocument.dateKey }
+            key={ documentKey }
             document={ notepadDocument }
             onSave={ (content) => {
                 onSaveStatusChange?.({
@@ -156,11 +172,17 @@ export function Notepad({ onSaveStatusChange }: NotepadProps) {
                     loadingState: "saving",
                     lastSavedAt: lastSavedAtRef.current,
                 });
-                saveNotepadMutation.mutate({
-                    dateKey: notepadDocument.dateKey,
-                    title: notepadDocument.title,
-                    content,
-                });
+                saveNotepadMutation.mutate(notepadReference.kind === "date"
+                    ? {
+                        dateKey: notepadReference.dateKey,
+                        title: notepadDocument.title,
+                        content,
+                    }
+                    : {
+                        notepadId: notepadReference.notepadId,
+                        title: notepadDocument.title,
+                        content,
+                    });
             } }
         />
     );

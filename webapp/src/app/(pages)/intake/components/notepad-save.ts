@@ -1,8 +1,8 @@
-import type { NotepadDocument, SaveNotepadDocument } from "@common/types/intake";
+import type { NotepadDocument, SaveNotepadByIdDocument, SaveNotepadDocument } from "@common/types/intake";
 
 const SAVE_NOTEPAD_ERROR_MESSAGE = "Failed to save notepad. Please try again.";
 
-type SaveNotepad = (payload: SaveNotepadDocument) => Promise<NotepadDocument | null>;
+type SaveNotepad = (payload: SaveNotepadDocument | SaveNotepadByIdDocument) => Promise<NotepadDocument | null>;
 type ShowSaveError = (message: string) => void;
 
 export function formatSaveNotepadErrorMessage(error: unknown) {
@@ -16,7 +16,7 @@ export function formatSaveNotepadErrorMessage(error: unknown) {
 export function createSaveNotepadMutationFn(
     saveNotepad: SaveNotepad,
 ) {
-    return async (payload: SaveNotepadDocument) => saveNotepad(payload);
+    return async (payload: SaveNotepadDocument | SaveNotepadByIdDocument) => saveNotepad(payload);
 }
 
 export function createSaveNotepadMutationOptions(

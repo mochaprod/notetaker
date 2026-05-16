@@ -4,26 +4,29 @@ import { Input } from "@/components/ui/input";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { getNotepad, saveNotepad } from "../../actions/notepad";
+import { getDailyNotepad, getNotepadById, saveDailyNotepad, saveNotepadById } from "../../actions/notepad";
+import type { NotepadReference } from "../notepad-reference";
+import { notepadQueryKey } from "../notepad-query";
 import { createSaveNotepadMutationOptions } from "../notepad-save";
 import {
     getEditableTitle,
     getSaveDocument,
     normalizeTitle,
 } from "./title-editor-helpers";
-import { notepadQueryKey } from "../notepad-query";
 
 type TitleEditorProps = {
-    dateKey: string;
+    notepadReference: NotepadReference;
 };
 
-export function TitleEditor({ dateKey }: TitleEditorProps) {
+export function TitleEditor({ notepadReference }: TitleEditorProps) {
     const [isEditing, setIsEditing] = useState(false);
     const queryClient = useQueryClient();
-    const queryKey = notepadQueryKey(dateKey);
+    const queryKey = notepadQueryKey(notepadReference);
     const { data: document, isError } = useQuery({
         queryKey,
-        queryFn: () => getNotepad(dateKey),
+        queryFn: () => notepadReference.kind === "date"
+            ? getDailyNotepad(notepadReference.dateKey)
+            : getNotepadById(notepadReference.notepadId),
     });
     const title = isError ? "Failed to load title" : getEditableTitle(document);
     const [draftTitle, setDraftTitle] = useState(title);
@@ -36,14 +39,16 @@ export function TitleEditor({ dateKey }: TitleEditorProps) {
     }, [isEditing, title]);
 
     const saveTitleMutation = useMutation(createSaveNotepadMutationOptions(
-        saveNotepad,
+        (payload) => notepadReference.kind === "date"
+            ? saveDailyNotepad(payload)
+            : saveNotepadById(payload),
         toast.error,
         (savedDocument) => {
             if (!savedDocument) {
                 return;
             }
 
-            queryClient.setQueryData(notepadQueryKey(savedDocument.dateKey), savedDocument);
+            queryClient.setQueryData(queryKey, savedDocument);
             setIsEditing(false);
         },
     ));
@@ -73,11 +78,24 @@ export function TitleEditor({ dateKey }: TitleEditorProps) {
             return;
         }
 
-        const saveDocument = getSaveDocument(dateKey, document);
+        if (notepadReference.kind === "date") {
+            const saveDocument = getSaveDocument(notepadReference.dateKey, document);
+            saveTitleMutation.mutate({
+                dateKey: saveDocument.dateKey,
+                title: normalizedTitle,
+                content: saveDocument.content,
+            });
+            return;
+        }
+
+        if (!document) {
+            return;
+        }
+
         saveTitleMutation.mutate({
-            dateKey: saveDocument.dateKey,
+            notepadId: notepadReference.notepadId,
             title: normalizedTitle,
-            content: saveDocument.content,
+            content: document.content,
         });
     }
 

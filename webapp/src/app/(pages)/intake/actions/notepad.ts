@@ -3,7 +3,7 @@
 import { auth } from "@/lib/auth";
 import { notepadRepository } from "@/lib/db/db-instance";
 import { createEmptySlateDocument, DEFAULT_NOTEPAD_TITLE } from "@/lib/intake/default-document";
-import { NotepadDocument, SaveNotepadDocumentSchema } from "@common/types/intake";
+import { NotepadDocument, SaveNotepadByIdDocumentSchema, SaveNotepadDocumentSchema } from "@common/types/intake";
 import { headers } from "next/headers";
 
 export async function createDefaultNotepadDocument(dateKey: string): Promise<NotepadDocument> {
@@ -17,29 +17,61 @@ export async function createDefaultNotepadDocument(dateKey: string): Promise<Not
     };
 }
 
-export async function getNotepad(dateKey: string): Promise<NotepadDocument | null> {
+async function getSessionUserId() {
     const session = await auth.api.getSession({
         headers: await headers(),
     });
 
-    if (!session?.user) {
+    return session?.user?.id ?? null;
+}
+
+export async function getDailyNotepad(dateKey: string): Promise<NotepadDocument | null> {
+    const userId = await getSessionUserId();
+
+    if (!userId) {
         return null;
     }
 
-    return await notepadRepository.getByDateKey(session.user.id, dateKey)
+    return await notepadRepository.getByDateKey(userId, dateKey)
         ?? createDefaultNotepadDocument(dateKey);
 }
 
-export async function saveNotepad(input: unknown): Promise<NotepadDocument | null> {
-    const session = await auth.api.getSession({
-        headers: await headers(),
-    });
+export async function getNotepadById(notepadId: string): Promise<NotepadDocument | null> {
+    const userId = await getSessionUserId();
 
-    if (!session?.user) {
+    if (!userId) {
+        return null;
+    }
+
+    const notepad = await notepadRepository.getById(userId, notepadId);
+
+    if (!notepad) {
+        throw new Error("Notepad not found");
+    }
+
+    return notepad;
+}
+
+export async function saveDailyNotepad(input: unknown): Promise<NotepadDocument | null> {
+    const userId = await getSessionUserId();
+
+    if (!userId) {
         return null;
     }
 
     const parsedInput = SaveNotepadDocumentSchema.parse(input);
 
-    return await notepadRepository.saveByDateKey(session.user.id, parsedInput);
+    return await notepadRepository.saveByDateKey(userId, parsedInput);
+}
+
+export async function saveNotepadById(input: unknown): Promise<NotepadDocument | null> {
+    const userId = await getSessionUserId();
+
+    if (!userId) {
+        return null;
+    }
+
+    const parsedInput = SaveNotepadByIdDocumentSchema.parse(input);
+
+    return await notepadRepository.saveById(userId, parsedInput);
 }

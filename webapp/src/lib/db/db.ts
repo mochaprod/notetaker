@@ -1,5 +1,5 @@
 import { Note } from "@common/types/notes";
-import { NotepadDocument, SaveNotepadDocument } from "@common/types/intake";
+import { NotepadDocument, SaveNotepadByIdDocument, SaveNotepadDocument } from "@common/types/intake";
 import { Summary } from "@common/types/summary";
 import { Todo, TodoData } from "@common/types/todo";
 import { AICredit } from "@common/types/user";
@@ -31,5 +31,7 @@ export interface TodoRepository {
 
 export interface NotepadRepository {
     getByDateKey: (userId: string, dateKey: string) => Promise<NotepadDocument | null>;
+    getById: (userId: string, notepadId: string) => Promise<NotepadDocument | null>;
     saveByDateKey: (userId: string, input: SaveNotepadDocument) => Promise<NotepadDocument>;
+    saveById: (userId: string, input: SaveNotepadByIdDocument) => Promise<NotepadDocument>;
 }

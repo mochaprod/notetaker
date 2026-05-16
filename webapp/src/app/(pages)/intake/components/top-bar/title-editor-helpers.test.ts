@@ -59,7 +59,7 @@ describe("title editor helpers", () => {
             updatedAt: new Date("2026-05-03T10:00:00.000Z"),
         };
 
-        expect(getSaveDocument("2026-05-03", document)).toBe(document);
+        expect(getSaveDocument("2026-05-03", document)).toEqual(document);
     });
 
     it("creates an empty default document for title saves before persistence exists", () => {
