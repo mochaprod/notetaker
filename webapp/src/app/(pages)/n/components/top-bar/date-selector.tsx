@@ -25,7 +25,7 @@ export function DateSelector({ notepadReference }: DateSelectorProps) {
 
     const selectDate = useCallback((date: Date) => {
         const dateToSet = isBefore(date, today) || isSameDay(date, today) ? date : currentDate;
-        router.push(`/intake/date/${formatDate(dateToSet)}`);
+        router.push(`/n/date/${formatDate(dateToSet)}`);
     }, [currentDate, router, today]);
 
     return (

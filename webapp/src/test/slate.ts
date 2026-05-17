@@ -1,10 +1,10 @@
 import { createEditor, type Descendant, type Editor } from "slate";
-import { installInsertTextOverride } from "@/app/(pages)/intake/components/editor/overrides/insert-text";
-import { installInlineMarkdownMarkOverride } from "@/app/(pages)/intake/components/editor/overrides/insert-inline-marks";
-import { installInsertBreakOverride } from "@/app/(pages)/intake/components/editor/overrides/insert-break";
-import { installDeleteBackwardOverride } from "@/app/(pages)/intake/components/editor/overrides/delete-backward";
-import { installDeleteFragmentOverride } from "@/app/(pages)/intake/components/editor/overrides/delete-fragment";
-import { installNormalizeNode } from "@/app/(pages)/intake/components/editor/overrides/normalize-node";
+import { installInsertTextOverride } from "@/app/(pages)/n/components/editor/overrides/insert-text";
+import { installInlineMarkdownMarkOverride } from "@/app/(pages)/n/components/editor/overrides/insert-inline-marks";
+import { installInsertBreakOverride } from "@/app/(pages)/n/components/editor/overrides/insert-break";
+import { installDeleteBackwardOverride } from "@/app/(pages)/n/components/editor/overrides/delete-backward";
+import { installDeleteFragmentOverride } from "@/app/(pages)/n/components/editor/overrides/delete-fragment";
+import { installNormalizeNode } from "@/app/(pages)/n/components/editor/overrides/normalize-node";
 
 export function createMarkdownEditor(children: Descendant[]): Editor {
     const editor = createEditor();

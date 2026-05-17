@@ -76,13 +76,13 @@ describe("withAuth", () => {
         });
 
         const Component = withAuth(() => React.createElement("div", null, "Sign in"), {
-            redirectTo: "/intake",
+            redirectTo: "/n",
             invert: true,
         });
 
         await Component({});
 
-        expect(redirectMock).toHaveBeenCalledWith("/intake");
+        expect(redirectMock).toHaveBeenCalledWith("/n");
     });
 
     it("does not redirect inverted routes when there is no session", async () => {
@@ -90,7 +90,7 @@ describe("withAuth", () => {
         getSessionMock.mockResolvedValue(null);
 
         const Component = withAuth(() => React.createElement("div", null, "Sign in"), {
-            redirectTo: "/intake",
+            redirectTo: "/n",
             invert: true,
         });
 

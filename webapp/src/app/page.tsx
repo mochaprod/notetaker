@@ -330,4 +330,4 @@ function Home() {
     );
 }
 
-export default withAuth(Home, { redirectTo: "/intake", invert: true });
+export default withAuth(Home, { redirectTo: "/n", invert: true });

@@ -33,7 +33,7 @@ export function NotepadsList() {
                     Notepads
                 </h1>
                 <Button asChild>
-                    <Link href="/intake">
+                    <Link href="/n">
                         New daily note
                     </Link>
                 </Button>
@@ -53,7 +53,7 @@ export function NotepadsList() {
                     <>
                         <Link
                             key={ notepad.id }
-                            href={`/intake/notepad/${notepad.id}`}
+                            href={`/n/notepad/${notepad.id}`}
                             className="rounded-md transition-colors"
                         >
                             <div className="flex items-start justify-between gap-4">
