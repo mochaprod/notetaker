@@ -125,6 +125,7 @@ model Notepad {
   daily     DailyNotepad?
 
   @@index([userId])
+  @@index([userId, createdAt(sort: Desc), id(sort: Desc)])
   @@map("notepad")
 }
 

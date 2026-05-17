@@ -1,5 +1,5 @@
 import { Note } from "@common/types/notes";
-import { NotepadDocument, SaveNotepadByIdDocument, SaveNotepadDocument } from "@common/types/intake";
+import { NotepadDocument, NotepadsCursor, PaginatedNotepads, SaveNotepadByIdDocument, SaveNotepadDocument } from "@common/types/intake";
 import { Summary } from "@common/types/summary";
 import { Todo, TodoData } from "@common/types/todo";
 import { AICredit } from "@common/types/user";
@@ -34,4 +34,13 @@ export interface NotepadRepository {
     getById: (userId: string, notepadId: string) => Promise<NotepadDocument | null>;
     saveByDateKey: (userId: string, input: SaveNotepadDocument) => Promise<NotepadDocument>;
     saveById: (userId: string, input: SaveNotepadByIdDocument) => Promise<NotepadDocument>;
+}
+
+export interface NotepadsRepository {
+    getNotepads: (
+        userId: string,
+        input?: {
+            cursor?: NotepadsCursor;
+        },
+    ) => Promise<PaginatedNotepads>;
 }

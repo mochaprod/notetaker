@@ -130,3 +130,27 @@ export const SaveNotepadByIdDocumentSchema = PersistedNotepadDocumentSchema.pick
 });
 
 export type SaveNotepadByIdDocument = z.infer<typeof SaveNotepadByIdDocumentSchema>;
+
+export const ListedNotepadSchema = z.object({
+    id: z.string(),
+    title: z.string(),
+    dateKey: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable(),
+    createdAt: z.coerce.date(),
+    updatedAt: z.coerce.date(),
+});
+
+export type ListedNotepad = z.infer<typeof ListedNotepadSchema>;
+
+export const NotepadsCursorSchema = z.object({
+    createdAt: z.string().datetime(),
+    id: z.string(),
+});
+
+export type NotepadsCursor = z.infer<typeof NotepadsCursorSchema>;
+
+export const PaginatedNotepadsSchema = z.object({
+    items: z.array(ListedNotepadSchema),
+    nextCursor: NotepadsCursorSchema.nullable(),
+});
+
+export type PaginatedNotepads = z.infer<typeof PaginatedNotepadsSchema>;

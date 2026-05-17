@@ -53,19 +53,19 @@ export function TitleEditor({ notepadReference }: TitleEditorProps) {
         },
     ));
 
-    function startEditing() {
+    const startEditing = () => {
         skipNextBlurSaveRef.current = false;
         setDraftTitle(title);
         setIsEditing(true);
-    }
+    };
 
-    function cancelEditing() {
+    const cancelEditing = () => {
         skipNextBlurSaveRef.current = true;
         setDraftTitle(title);
         setIsEditing(false);
-    }
+    };
 
-    function saveTitle() {
+    const saveTitle = () => {
         if (isError) {
             return;
         }
@@ -97,7 +97,7 @@ export function TitleEditor({ notepadReference }: TitleEditorProps) {
             title: normalizedTitle,
             content: document.content,
         });
-    }
+    };
 
     if (isError) {
         return (
